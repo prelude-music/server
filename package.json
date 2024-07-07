@@ -18,7 +18,7 @@
     "better-sqlite3": "^11.1.2",
     "enhanced-switch": "^1.1.6",
     "json5": "^2.2.3",
-    "mime": "^4.0.3",
+    "mime": "^4.0.4",
     "music-metadata": "^8.3.0"
   }
 }
