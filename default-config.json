@@ -1,0 +1,15 @@
+{
+    // Web server port
+    port: 9847,
+
+    // Absolute paths to scan for music
+    // Can be paths to directories, or individual files.
+    // To limit the nesting level of subdirectories to scan, use the format `path:limit`.
+    // The default nesting limit is 20.
+    //   Example:
+    //      `/home/user/Music:0` do not scan subdirectories
+    //      `/home/user/Music:5` scan up to 5 subdirectories deep
+    discoverPaths: [
+
+    ]
+}
