@@ -11,3 +11,5 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
+    reviewers:
+      - "prelude-music/maintainers"
