@@ -82,7 +82,7 @@ class Library {
         return library;
     }
 
-    readonly #music: Map<number, Library.Track> = new Map();
+    readonly #music: Map<string, Library.Track> = new Map();
 
     public constructor() {
     }
@@ -91,12 +91,8 @@ class Library {
         return Array.from(this.#music.values());
     }
 
-    public getTrack(id: number): Library.Track | null {
+    public getTrack(id: string): Library.Track | null {
         return this.#music.get(id) ?? null;
-    }
-
-    public nextTrackId(): number {
-        return this.#music.size === 0 ? 0 : Math.max(...this.#music.keys()) + 1;
     }
 
     public async addTrack(...tracks: Music[]): Promise<void> {
@@ -109,7 +105,7 @@ class Library {
                     this.#albums.set(album.id, album);
                 }
             }
-            const track = music instanceof Library.Track ? music : new Library.Track(this.nextTrackId(), music, album);
+            const track = music instanceof Library.Track ? music : new Library.Track(music, album);
             for (const artistName of music.artists) {
                 const artist = this.#artists.get(Library.Artist.id(artistName)) ?? await (async () => {
                     try {
@@ -209,8 +205,10 @@ class Library {
 
 namespace Library {
     export class Track extends Music {
-        public constructor(public readonly id: number, music: Music, public readonly album: Album | null) {
+        public readonly id: string;
+        public constructor(music: Music, public readonly album: Album | null) {
             super(music.file, music.meta, music);
+            this.id = Library.Track.id(music.title, music.artist);
         }
 
         public get(): JsonResponse.Object {
@@ -236,6 +234,10 @@ namespace Library {
                     lossless: this.meta.lossless
                 }
             }
+        }
+
+        public static id(name: string, artist: string | null) {
+            return Library.id(artist, name);
         }
     }
 
