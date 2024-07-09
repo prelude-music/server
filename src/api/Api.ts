@@ -48,7 +48,7 @@ class Api {
                         .value;
                 }
                 else {
-                    const track = this.library.getTrack(Number.parseInt(parts[1]!, 10));
+                    const track = this.library.getTrack(parts[1]!);
                     if (track === null)
                         return new ErrorResponse(404, "The requested track is not part of this library.");
 
