@@ -2,8 +2,21 @@ import JsonResponse from "./JsonResponse.js";
 import Api from "../api/Api.js";
 
 export default class PageResponse extends JsonResponse {
-    public constructor(resources: JsonResponse.Object[], page: number, limit: number, total: number = resources.length) {
-        super({resources, page, limit, total}, 200);
+    public constructor(req: Api.Request, resources: JsonResponse.Object[], page: number, limit: number, total: number = resources.length) {
+        const href: URL = new URL(req.url);
+        const previous: URL | null = page > 1 ? new URL(req.url) : null;
+        if (previous !== null) previous.searchParams.set("page", String(page - 1));
+        const next: URL | null = page < Math.ceil(total / limit) ? new URL(req.url) : null;
+        if (next !== null) next.searchParams.set("page", String(page + 1));
+        super({
+            page,
+            limit,
+            total,
+            href: href.pathname + href.search,
+            previous: previous === null ? null : previous.pathname + previous.search,
+            next: next === null ? null : next.pathname + next.search,
+            resources,
+        }, 200);
     }
 
     public static array<T = JsonResponse.Object>(limits: { page: number, limit: number }, array: T[]): {
@@ -31,6 +44,6 @@ export default class PageResponse extends JsonResponse {
 
         const data = this.array<T>(req.limit(), resources);
         const res: JsonResponse.Object[] = (mapFn ? data.resources.map(mapFn) : data.resources) as JsonResponse.Object[];
-        return new PageResponse(res, data.page, data.limit, data.total);
+        return new PageResponse(req, res, data.page, data.limit, data.total);
     }
 }
