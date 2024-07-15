@@ -19,6 +19,6 @@
     "enhanced-switch": "^1.1.7",
     "json5": "^2.2.3",
     "mime": "^4.0.4",
-    "music-metadata": "^8.3.0"
+    "music-metadata": "^9.0.1"
   }
 }
