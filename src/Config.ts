@@ -5,7 +5,7 @@ export default class Config {
     /**
      * Port on which the web server will listen
      */
-    public readonly port: number = 9847;
+    public readonly port: number;
 
     /**
      * Absolute paths to music files and/or directories.
@@ -19,14 +19,14 @@ export default class Config {
      *  - `/music:1` will only check for music files in `/music` and direct subdirectories (1 level deep)
      *  - `/music/audio.flac` will include the file `audio.flac`
      */
-    public discoverPaths: string[] = [];
+    public discoverPaths: string[];
 
     public constructor(options: {
         port?: typeof Config.prototype.port,
         discoverPaths?: typeof Config.prototype.discoverPaths
     }) {
-        if (options.port !== undefined) this.port = options.port;
-        if (options.discoverPaths !== undefined) this.discoverPaths = options.discoverPaths;
+        this.port = options.port ?? 9847;
+        this.discoverPaths = options.discoverPaths ?? [];
     }
 
     public static async fromFile(file: File): Promise<Config> {
