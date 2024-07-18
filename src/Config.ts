@@ -1,5 +1,6 @@
 import File from "./File.js";
 import JsonResponse from "./response/JsonResponse.js";
+import SystemFile from "./SystemFile.js";
 
 export default class Config {
     /**
@@ -21,12 +22,26 @@ export default class Config {
      */
     public discoverPaths: string[];
 
+    /**
+     * Name to use when track artist not known
+     */
+    public readonly unknownArtist: string;
+
+    /**
+     * SQLite database path
+     */
+    public readonly db: File;
+
     public constructor(options: {
         port?: typeof Config.prototype.port,
-        discoverPaths?: typeof Config.prototype.discoverPaths
+        discoverPaths?: typeof Config.prototype.discoverPaths,
+        unknownArtist?: typeof Config.prototype.unknownArtist,
+        db?: typeof Config.prototype.db,
     }) {
         this.port = options.port ?? 9847;
         this.discoverPaths = options.discoverPaths ?? [];
+        this.unknownArtist = options.unknownArtist ?? "Unknown Artist";
+        this.db = options.db ?? new SystemFile("/prelude.db");
     }
 
     public static async fromFile(file: File): Promise<Config> {
