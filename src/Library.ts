@@ -1,14 +1,16 @@
-import crypto from "node:crypto";
+import {parseFile as getMetadataFromFile} from "music-metadata";
 import File from "./File.js";
-import Music from "./resource/Music.js";
-import JsonResponse from "./response/JsonResponse.js";
-import Api from "./api/Api.js";
-import PageResponse from "./response/PageResponse.js";
-import SpotifyApi from "./SpotifyApi.js";
-import EnhancedSwitch from "enhanced-switch";
+//import SpotifyApi from "./SpotifyApi.js";
+import Database from "./db/Database.js";
+import Artist from "./resource/Artist.js";
+import Album from "./resource/Album.js";
+import Track from "./resource/Track.js";
 import Config from "./Config.js";
+import PageResponse from "./response/PageResponse.js";
+import JsonResponse from "./response/JsonResponse.js";
+import ApiRequest from "./api/ApiRequest.js";
 
-class Library {
+export default class Library {
     /**
      * Supported audio file extensions
      */
@@ -37,7 +39,18 @@ class Library {
         "wma"                  // WMA
     ];
 
-    private static readonly spotify = new SpotifyApi("https://api.spotify.com");
+    //private static readonly spotify = new SpotifyApi("https://api.spotify.com");
+
+    public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository };
+
+    public constructor(private readonly db: Database, private readonly config: Config) {
+        this.db = new Database(this.config.db);
+        this.repositories = {
+            artists: new Artist.Repository(this.db),
+            albums: new Album.Repository(this.db),
+            tracks: new Track.Repository(this.db)
+        }
+    }
 
     /**
      * Get absolute paths of supported audio files from file system
@@ -72,274 +85,129 @@ class Library {
         return result;
     }
 
-    public static async from(config: Config): Promise<Library> {
-        const library = new Library();
-        for (const path of config.discoverPaths) {
-            const music = await Promise.all((await Library.getFiles(path)).map(Music.fromFile.bind(Music)));
-            await library.addTrack(...music);
-        }
-
-        return library;
-    }
-
-    readonly #music: Map<string, Library.Track> = new Map();
-
-    public constructor() {
-    }
-
-    public getTracks(): Library.Track[] {
-        return Array.from(this.#music.values());
-    }
-
-    public getTrack(id: string): Library.Track | null {
-        return this.#music.get(id) ?? null;
-    }
-
-    public async addTrack(...tracks: Music[]): Promise<void> {
-        for (const music of tracks) {
-            let album: Library.Album | null = null;
-            if (music.albumName !== null) {
-                album = Array.from(this.#albums.values()).find(a => a.title === music.albumName && a.artist === music.artist) ?? null;
-                if (album === null) {
-                    album = new Library.Album(music.albumName ?? "Unknown", music.artist ?? null, []);
-                    this.#albums.set(album.id, album);
-                }
+    /**
+     * Create track from file and save in library
+     * @param file Local audio file
+     */
+    public async trackFromFile(file: File): Promise<Track> {
+        const meta = await getMetadataFromFile(file.path);
+        const artist = new Artist(Artist.ID.of(meta.common.artist ?? this.config.unknownArtist), meta.common.artist ?? this.config.unknownArtist, null);
+        const album = meta.common.album ? new Album(Album.ID.of(meta.common.album, artist.id), meta.common.album, artist.id) : null;
+        const title = meta.common.title ?? file.name();
+        const id = Track.ID.of(title, artist.id, album?.id);
+        const track = new Track(
+            id,
+            title,
+            artist.id,
+            album?.id ?? null,
+            file,
+            meta.common.year ?? null,
+            meta.common.genre?.map(g => g.toLowerCase()) ?? [],
+            meta.common.track.no === null ? null : {no: meta.common.track.no, of: meta.common.track.of},
+            meta.common.disk.no === null ? null : {no: meta.common.disk.no, of: meta.common.disk.of},
+            meta.format.duration === null ? 0 : Math.round(meta.format.duration!),
+            {
+                channels: meta.format.numberOfChannels ?? 0,
+                sampleRate: meta.format.sampleRate ?? 0,
+                bitrate: meta.format.bitrate ?? 0,
+                lossless: meta.format.lossless ?? false
             }
-            const track = music instanceof Library.Track ? music : new Library.Track(music, album);
-            for (const artistName of music.artists) {
-                const artist = this.#artists.get(Library.Artist.id(artistName)) ?? await (async () => {
-                    try {
-                        const image = await Library.spotify.getArtistImage(artistName, track.title);
-                        return new Library.Artist(artistName, [], image);
+        );
+
+        const isNewArtist = this.repositories.artists.get(artist.id) === null;
+        if (isNewArtist) this.repositories.artists.save(artist);
+
+        const isNewAlbum = album && this.repositories.albums.get(album.id) === null;
+        if (isNewAlbum) this.repositories.albums.save(album);
+
+        const isNewTrack = this.repositories.tracks.get(id) === null;
+        if (isNewTrack) this.repositories.tracks.save(track);
+
+        return track;
+    }
+
+    /**
+     * Remove track from library
+     * @param track Track to remove
+     */
+    public removeTrack(track: Track): void {
+        this.repositories.tracks.delete(track.id);
+        // request an empty set just to get the count. if no tracks in artist & artist albums, delete those as well
+        if (track.album !== null) {
+            const {total: albumTracks} = this.repositories.tracks.album(track.album, {limit: 0, offset: 0});
+            if (albumTracks === 0)
+                this.repositories.albums.delete(track.album);
+        }
+        const {total: artistTracks} = this.repositories.tracks.artist(track.artist, {limit: 0, offset: 0});
+        if (artistTracks === 0)
+            this.repositories.artists.delete(track.artist);
+    }
+
+    /**
+     * Validate all tracks in the library (tracks with missing audio will be removed) and check for new tracks on filesystem
+     */
+    public async reload() {
+        return {
+            removed: await this.removeOrphanedTracks(),
+            added: await this.checkForNewTracks()
+        }
+    }
+
+    /**
+     * Remove tracks from the DB that are no longer present on disk
+     */
+    public async removeOrphanedTracks(): Promise<number> {
+        let removed = 0;
+        const {total} = this.repositories.tracks.list({limit: 0, offset: 0});
+        const tracks = this.repositories.tracks.list({limit: total, offset: 0});
+        const promises: Promise<void>[] = [];
+        for (const track of tracks.resources)
+            promises.push(track.file.isReadable().then(readable => {
+                if (!readable) {
+                    this.removeTrack(track);
+                    ++removed;
+                }
+            }));
+        await Promise.all(promises);
+        return removed;
+    }
+
+    /**
+     * Check local filesystem for new tracks
+     */
+    public async checkForNewTracks(): Promise<number> {
+        let added = 0;
+        const promises: Promise<any>[] = [];
+        for (const path of this.config.discoverPaths) {
+            const p = Library.getFiles(path);
+            promises.push(p);
+            p.then(files => {
+                for (const file of files)
+                    if (this.repositories.tracks.getFromFile(file) === null) {
+                        promises.push(this.trackFromFile(file));
+                        ++added;
                     }
-                    catch (e) {
-                        return new Library.Artist(artistName, [], null);
-                    }
-                })();
-                artist.addTrack(track);
-                this.#artists.set(artist.id, artist);
-            }
-            const artist = this.#artists.get(Library.Artist.id(music.artist ?? "Unknown Artist")) ?? await (async () => {
-                if (music.artist === null) return new Library.Artist("Unknown Artist", [], null);
-                try {
-                    const image = await Library.spotify.getArtistImage(music.artist, track.title);
-                    return new Library.Artist(music.artist, [], image);
-                }
-                catch (e) {
-                    return new Library.Artist(music.artist, [], null);
-                }
-            })();
-            artist.addTrack(track);
-            this.#artists.set(artist.id, artist);
-            this.#music.set(track.id, track);
-            if (album !== null)
-                album.addTrack(track);
-        }
-    }
-
-    public clearTracks() {
-        this.#music.clear();
-    }
-
-    public static id(...args: (string | null | undefined)[]) {
-        return this.hash(args.map(s => {
-            const k = ([null, undefined].some(t => t === s) ? "" : s as string);
-            return k.length + k;
-        }).join(""));
-    }
-
-    private static hash(string: string): string {
-        return crypto.createHash("sha1").update(string).digest("base64").replace(/=+$/, "").replace(/\/+/g, "-");
-    }
-
-    #albums: Map<string, Library.Album> = new Map();
-
-    public getAlbums(): Library.Album[] {
-        return Array.from(this.#albums.values());
-    }
-
-    public getAlbum(id: string): Library.Album | null {
-        return this.#albums.get(id) ?? null;
-    }
-
-    #artists: Map<string, Library.Artist> = new Map();
-
-    public getArtists(): Library.Artist[] {
-        return Array.from(this.#artists.values());
-    }
-
-    public getArtist(id: string): Library.Artist | null {
-        return this.#artists.get(id) ?? null;
-    }
-
-    // HTTP
-
-    public tracks(req: Api.Request): JsonResponse {
-        return PageResponse.from(req, this.getTracks(), music => music.get());
-    }
-
-    public albums(req: Api.Request): JsonResponse {
-        return PageResponse.from(req, new EnhancedSwitch<string | null, Library.Album[]>(req.url.searchParams.get("sort"))
-            .case("title:desc", () => this.getAlbums().sort((a, b) => b.title.localeCompare(a.title)))
-            .case("title:asc", () => this.getAlbums().sort((a, b) => a.title.localeCompare(b.title)))
-            .case("tracks:desc", () => this.getAlbums().sort((a, b) => b.tracks().length - a.tracks().length))
-            .case("tracks:asc", () => this.getAlbums().sort((a, b) => a.tracks().length - b.tracks().length))
-            .case("duration:desc", () => this.getAlbums().sort((a, b) => b.duration() - a.duration()))
-            .case("duration:asc", () => this.getAlbums().sort((a, b) => a.duration() - b.duration()))
-            .default(this.getAlbums())
-            .value, album => album.get());
-    }
-
-    public artists(req: Api.Request): JsonResponse {
-        return PageResponse.from(req, new EnhancedSwitch<string | null, Library.Artist[]>(req.url.searchParams.get("sort"))
-            .case("name:desc", () => this.getArtists().sort((a, b) => b.name.localeCompare(a.name)))
-            .case("name:asc", () => this.getArtists().sort((a, b) => a.name.localeCompare(b.name)))
-            .case("tracks:desc", () => this.getArtists().sort((a, b) => b.tracks().length - a.tracks().length))
-            .case("tracks:asc", () => this.getArtists().sort((a, b) => a.tracks().length - b.tracks().length))
-            .case("duration:desc", () => this.getArtists().sort((a, b) => b.duration() - a.duration()))
-            .case("duration:asc", () => this.getArtists().sort((a, b) => a.duration() - b.duration()))
-            .default(this.getArtists())
-            .value, artist => artist.get());
-    }
-}
-
-namespace Library {
-    export class Track extends Music {
-        public readonly id: string;
-        public constructor(music: Music, public readonly album: Album | null) {
-            super(music.file, music.meta, music);
-            this.id = Library.Track.id(music.title, music.artist);
-        }
-
-        public get(): JsonResponse.Object {
-            return {
-                id: this.id,
-                title: this.title,
-                artists: this.artists,
-                artist: this.artist,
-                album: this.album ? {
-                    id: this.album.id,
-                    title: this.album.title,
-                    artist: this.album.artist
-                } : null,
-                year: this.year,
-                genres: this.genres,
-                track: this.track,
-                disk: this.disk,
-                meta: {
-                    duration: this.meta.duration,
-                    channels: this.meta.channels,
-                    sampleRate: this.meta.sampleRate,
-                    bitrate: this.meta.bitrate,
-                    lossless: this.meta.lossless
-                }
-            }
-        }
-
-        public static id(name: string, artist: string | null) {
-            return Library.id(artist, name);
-        }
-    }
-
-    export class Album {
-        #tracks: Track[] = [];
-        public readonly id: string;
-
-        public constructor(
-            public readonly title: string,
-            public readonly artist: string | null,
-            tracks: Track[]
-        ) {
-            this.#tracks = tracks;
-            this.id = Library.Album.id(title, artist);
-        }
-
-        public tracks() {
-            return this.#tracks.sort((a, b) => {
-                if (a.track === null && b.track === null) return 0;
-                if (a.track === null) return 1;
-                if (b.track === null) return -1;
-                return a.track.no - b.track.no;
             });
         }
-
-        public addTrack(track: Track) {
-            if (this.#tracks.some(t => t.id === track.id)) return;
-            this.#tracks.push(track);
-        }
-
-        public async cover() {
-            for (let i = 0; i < Math.min(5, this.#tracks.length); ++i) {
-                const cover = await this.#tracks[i]!.cover();
-                if (cover !== null) return cover;
-            }
-            return null;
-        }
-
-        public duration() {
-            return this.#tracks.reduce((a, b) => a + b.meta.duration, 0);
-        }
-
-        public get(): JsonResponse.Object {
-            return {
-                id: this.id,
-                title: this.title,
-                artist: this.artist,
-                tracks: this.tracks().length,
-                duration: this.duration(),
-            }
-        }
-
-        public static id(name: string, artist: string | null) {
-            return Library.id(artist, name);
-        }
+        await Promise.all(promises);
+        return added;
     }
 
-    export class Artist {
-        #tracks: Track[] = [];
-        public readonly id: string;
+    public tracks(req: ApiRequest): JsonResponse {
+        const tracks = this.repositories.tracks.list(req.limit());
+        const limit = req.limit();
+        return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
+    }
 
-        public constructor(
-            public readonly name: string,
-            tracks: Track[],
-            public readonly image: string | null
-        ) {
-            this.#tracks = tracks;
-            this.id = Artist.id(this.name);
-        }
+    public albums(req: ApiRequest): JsonResponse {
+        const albums = this.repositories.albums.list(req.limit());
+        const limit = req.limit();
+        return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
+    }
 
-        public tracks() {
-            return this.#tracks.sort((a, b) => a.title.localeCompare(b.title));
-        }
-
-        public albums() {
-            return ([...new Set(this.#tracks.map(track => track.album))].filter(album => album !== null) as Album[]).sort((a, b) => b.tracks().length - a.tracks().length);
-        }
-
-        public addTrack(track: Track) {
-            if (this.#tracks.some(t => t.id === track.id)) return;
-            this.#tracks.push(track);
-        }
-
-        public duration() {
-            return this.#tracks.reduce((a, b) => a + b.meta.duration, 0);
-        }
-
-        public get(): JsonResponse.Object {
-            return {
-                id: this.id,
-                name: this.name,
-                tracks: this.tracks().length,
-                albums: this.albums().length,
-                image: this.image,
-                duration: this.duration(),
-            }
-        }
-
-        public static id(name: string) {
-            return Library.id(name);
-        }
+    public artists(req: ApiRequest): JsonResponse {
+        const artists = this.repositories.artists.list(req.limit());
+        const limit = req.limit();
+        return new PageResponse(req, artists.resources.map(a => a.json()), limit.page, limit.limit, artists.total);
     }
 }
-
-export default Library;

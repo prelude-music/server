@@ -6,6 +6,10 @@ import JsonResponse from "../response/JsonResponse.js";
 import Library from "../Library.js";
 import FileResponse from "../response/FileResponse.js";
 import BufferResponse from "../response/BufferResponse.js";
+import Track from "../resource/Track.js";
+import Artist from "../resource/Artist.js";
+import Album from "../resource/Album.js";
+import ApiRequest from "./ApiRequest.js";
 
 export default class Api {
     public constructor(
@@ -46,12 +50,12 @@ export default class Api {
                         .value;
                 }
                 else {
-                    const track = this.library.getTrack(parts[1]!);
+                    const track = this.library.repositories.tracks.get(new Track.ID(parts[1]!));
                     if (track === null)
                         return new ErrorResponse(404, "The requested track is not part of this library.");
 
                     if (parts.length === 2)
-                        return new JsonResponse(track.get());
+                        return new JsonResponse(track.json());
 
                     else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
                         .case("audio", new FileResponse(track.file))
@@ -73,20 +77,20 @@ export default class Api {
                         .value;
                 }
                 else {
-                    const album = this.library.getAlbum(parts[1]!);
+                    const album = this.library.repositories.albums.get(new Album.ID(parts[1]!));
                     if (album === null)
                         return new ErrorResponse(404, "The requested album is not part of this library.");
 
                     if (parts.length === 2)
-                        return new JsonResponse(album.get());
+                        return new JsonResponse(album.json());
                     else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
-                        .case("tracks", PageResponse.from(req, album.tracks(), track => track.get()))
+                        /*.case("tracks", PageResponse.from(req, album.tracks(), track => track.get()))
                         .case("image", async () => {
                             const image = await album.cover();
                             if (image === null)
                                 return new ErrorResponse(404, "No cover art available for this album.");
                             return new BufferResponse(image.data, image.type);
-                        })
+                        })*/
                         .default(endpointNotFound)
                         .value;
                 }
@@ -99,14 +103,14 @@ export default class Api {
                         .value;
                 }
                 else {
-                    const artist = this.library.getArtist(parts[1]!);
+                    const artist = this.library.repositories.artists.get(new Artist.ID(parts[1]!));
                     if (artist === null)
                         return new ErrorResponse(404, "The requested artist is not part of this library.");
                     if (parts.length === 2)
-                        return new JsonResponse(artist.get());
+                        return new JsonResponse(artist.json());
                     else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
-                        .case("tracks", PageResponse.from(req, artist.tracks(), track => track.get()))
-                        .case("albums", PageResponse.from(req, artist.albums(), album => album.get()))
+                        /*.case("tracks", PageResponse.from(req, artist.tracks(), track => track.get()))
+                        .case("albums", PageResponse.from(req, artist.albums(), album => album.get()))*/
                         .default(endpointNotFound)
                         .value;
                 }

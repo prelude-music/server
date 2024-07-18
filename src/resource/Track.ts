@@ -1,0 +1,208 @@
+import {parseFile as getMetadataFromFile} from "music-metadata";
+import ID_ from "../ID.js";
+import File from "../File.js";
+import Artist from "./Artist.js";
+import Album from "./Album.js";
+import JsonResponse from "../response/JsonResponse.js";
+import Repository_ from "../Repository.js";
+import {Statement} from "better-sqlite3";
+import ApiResource from "../api/ApiResource.js";
+
+class Track extends ApiResource {
+    public constructor(
+        public override readonly id: Track.ID,
+        public readonly title: string,
+        public readonly artist: Artist.ID,
+        public readonly album: Album.ID | null,
+        public readonly file: File,
+        public year: number | null,
+        public genres: string[],
+        public track: { no: number, of: number | null } | null,
+        public disk: { no: number, of: number | null } | null,
+        public readonly duration: number,
+        public meta: Track.Meta
+    ) {
+        super();
+    }
+
+    public override json(): JsonResponse.Object {
+        return {
+            id: this.id.id,
+            title: this.title,
+            artist: this.artist.id,
+            album: this.album?.id ?? null,
+            year: this.year,
+            genres: this.genres,
+            track: this.track,
+            disk: this.disk,
+            duration: this.duration,
+            meta: {
+                channels: this.meta.channels,
+                sampleRate: this.meta.sampleRate,
+                bitrate: this.meta.bitrate,
+                lossless: this.meta.lossless
+            }
+        }
+    }
+
+    public async cover(): Promise<{ type: string, data: Buffer } | null> {
+        const meta = await getMetadataFromFile(this.file.path);
+        if (meta.common.picture === undefined || meta.common.picture!.length === 0) return null;
+        const pic = meta.common.picture!.length === 1 ? meta.common.picture![0] : meta.common.picture!.find(p => ["cover", "front", "album"].some(t => p.type?.toLowerCase().includes(t)));
+        if (pic === undefined) return null;
+        return {
+            type: pic.format,
+            data: pic.data
+        };
+    }
+
+    public static row(row: Record<string, any>): Track {
+        return new Track(
+            new Track.ID(row.id),
+            row.title,
+            new Artist.ID(row.artist),
+            !row.album ? null : new Album.ID(row.album),
+            new File(row.file),
+            row.year ?? null,
+            JSON.parse(row.genres),
+            !row.track_no ? null : {no: row.track_no, of: row.track_of},
+            !row.disk_no ? null : {no: row.disk_no, of: row.disk_of},
+            row.duration,
+            JSON.parse(row.meta)
+        );
+    }
+}
+
+namespace Track {
+    export class ID extends ID_ {
+        public static override of(title: string, artist: Artist.ID, album?: Album.ID | null): ID {
+            return super.of(title, artist.id, album?.id);
+        }
+    }
+
+    export interface Meta {
+        /**
+         * The number of audio channels
+         */
+        readonly channels: number;
+
+        /**
+         * Sample rate in Hz
+         */
+        readonly sampleRate: number;
+
+        /**
+         * Bitrate in bits per second
+         */
+        readonly bitrate: number;
+
+        /**
+         * Whether the audio format is lossless.
+         */
+        readonly lossless: boolean;
+    }
+
+    export class Repository extends Repository_<Track> {
+        private readonly statements = {
+            get: this.database.prepare<[string], Record<string, any>>("SELECT * FROM `tracks` WHERE `id` = ?"),
+            getFromFile: this.database.prepare<[string], Record<string, any>>("SELECT * FROM `tracks` WHERE `file` = ?"),
+            list: this.database.prepare<[number, number], Record<string, any>>("SELECT * FROM `tracks` LIMIT ? OFFSET ?"),
+            listSorted: (() => {
+                const fields = ["title", "year", "track_no", "disk_no", "duration"] as const;
+                const stmts: Record<keyof typeof fields, {asc: Statement<[number, number], Record<string, any>>, desc: Statement<[number, number], any>}> = {} as any;
+                for (const field of fields) {
+                    stmts[field as any] = {
+                        asc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` WHERE \`album\` = ? ORDER BY \`${field}\` LIMIT ? OFFSET ?`),
+                        desc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` WHERE \`album\` = ? ORDER BY \`${field}\` DESC LIMIT ? OFFSET ?`),
+                    };
+                }
+                return stmts;
+            })(),
+            count: this.database.prepare<[], { count: number }>("SELECT COUNT(*) as count FROM `tracks`"),
+            save: this.database.prepare<[string, string, string, string | null, string, number | null, string, number | null, number | null, number | null, number | null, number, string], any>("REPLACE INTO `tracks` (`id`, `title`, `artist`, `album`, `file`, `year`, `genres`, `track_no`, `track_of`, `disk_no`, `disk_of`, `duration`, `meta`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
+            delete: this.database.prepare<[string], void>("DELETE FROM `tracks` WHERE `id` = ?"),
+            artist: this.database.prepare<[string, number, number], Record<string, any>>("SELECT * FROM `tracks` WHERE `artist` = ? ORDER BY `year` DESC LIMIT ? OFFSET ?"),
+            countArtist: this.database.prepare<[string], { count: number }>("SELECT COUNT(*) as count FROM `tracks` WHERE `artist` = ?"),
+            album: this.database.prepare<[string, number, number], Record<string, any>>("SELECT * FROM `tracks` WHERE `album` = ? ORDER BY `track_no` DESC LIMIT ? OFFSET ?"),
+            countAlbum: this.database.prepare<[string], { count: number }>("SELECT COUNT(*) as count FROM `tracks` WHERE `album` = ?"),
+        } as const;
+
+        public override get(id: Track.ID) {
+            const row = this.statements.get.get(id.id);
+            if (row === undefined) return null;
+            return Track.row(row);
+        }
+
+        public getFromFile(file: File) {
+            const row = this.statements.getFromFile.get(file.path);
+            if (row === undefined) return null;
+            return Track.row(row);
+        }
+
+        public override list({limit, offset, sort}: { limit: number, offset: number, sort?: string }) {
+            sort: if (sort !== undefined) {
+                const parts = sort.split(":");
+                const col = parts[0];
+                if (col === undefined || !(col in this.statements.listSorted))
+                    break sort;
+                const dir = parts[1] === "desc" ? "desc" : "asc";
+                return {
+                    resources: this.statements.listSorted[col as any]![dir]!.all(limit, offset).map(Track.row),
+                    total: this.statements.count.get()!.count
+                };
+            }
+            return {
+                resources: this.statements.list.all(limit, offset).map(Track.row),
+                total: this.statements.count.get()!.count
+            };
+        }
+
+        public override save(resource: Track): void {
+            this.statements.save.run(
+                resource.id.id,
+                resource.title,
+                resource.artist.id,
+                resource.album?.id ?? null,
+                resource.file.path,
+                resource.year,
+                JSON.stringify(resource.genres),
+                resource.track?.no ?? null,
+                resource.track?.of ?? null,
+                resource.disk?.no ?? null,
+                resource.disk?.of ?? null,
+                resource.duration,
+                JSON.stringify(resource.meta)
+            );
+        }
+
+        public override delete(id: Track.ID): void {
+            this.statements.delete.run(id.id);
+        }
+
+        /**
+         * Get tracks by artist. Tracks are sorted descending by year.
+         * @param artist Artist ID
+         * @param limitOffset Limit and offset
+         */
+        public artist(artist: Artist.ID, {limit, offset}: { limit: number, offset: number }): { resources: Track[], total: number } {
+            return {
+                resources: this.statements.artist.all(artist.id, limit, offset).map(Track.row),
+                total: this.statements.countArtist.get(artist.id)!.count
+            };
+        }
+
+        /**
+         * Get tracks by album. Tracks are sorted descending by track number.
+         * @param album Album ID
+         * @param limitOffset Limit and offset
+         */
+        public album(album: Album.ID, {limit, offset}: { limit: number, offset: number }): { resources: Track[], total: number } {
+            return {
+                resources: this.statements.album.all(album.id, limit, offset).map(Track.row),
+                total: this.statements.countAlbum.get(album.id)!.count
+            };
+        }
+    }
+}
+
+export default Track;
