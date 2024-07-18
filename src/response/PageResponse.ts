@@ -1,8 +1,8 @@
 import JsonResponse from "./JsonResponse.js";
-import Api from "../api/Api.js";
+import ApiRequest from "../api/ApiRequest.js";
 
 export default class PageResponse extends JsonResponse {
-    public constructor(req: Api.Request, resources: JsonResponse.Object[], page: number, limit: number, total: number = resources.length) {
+    public constructor(req: ApiRequest, resources: JsonResponse.Object[], page: number, limit: number, total: number = resources.length) {
         const href: URL = new URL(req.url);
         const previous: URL | null = page > 1 ? new URL(req.url) : null;
         if (previous !== null) previous.searchParams.set("page", String(page - 1));
