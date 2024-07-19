@@ -10,12 +10,12 @@ export default abstract class ResourceController extends Controller {
      * @example ["tracks"] // matches everything that starts with /tracks/
      * @example ["artists", null, "tracks"] // matches everything that starts with /artists/<any>/tracks/
      */
-    public abstract readonly path: (string | null)[];
+    protected abstract readonly path: (string | null)[];
 
     /**
      * Index at which the path for this controller starts
      */
-    public readonly pathStartIndex: number = 0;
+    protected readonly pathStartIndex: number = 0;
 
     public constructor(protected readonly library: Library) {
         super();
@@ -26,7 +26,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Get resources
      */
-    public list(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected list(req: ApiRequest, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -35,7 +35,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Create resource
      */
-    public create(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected create(req: ApiRequest, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -44,7 +44,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Delete all resources
      */
-    public deleteAll(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected deleteAll(req: ApiRequest, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -53,7 +53,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Get resource
      */
-    public get(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected get(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -62,7 +62,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Delete resource
      */
-    public delete(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected delete(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -71,7 +71,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Replace resource
      */
-    public put(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected put(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 
@@ -80,7 +80,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Update resource
      */
-    public patch(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected patch(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
         return Controller.methodNotAllowed(req);
     }
 

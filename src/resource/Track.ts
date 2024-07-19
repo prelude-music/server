@@ -210,16 +210,16 @@ namespace Track {
     }
 
     export class Controller extends ResourceController {
-        public override readonly path = ["tracks"];
+        protected override readonly path = ["tracks"];
 
-        public override list(req: ApiRequest): ApiResponse {
+        protected override list(req: ApiRequest): ApiResponse {
             const sort = req.url.searchParams.get("sort");
             const limit = req.limit();
             const tracks = this.library.repositories.tracks.list({limit: limit.limit, offset: limit.offset, sort});
             return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
         }
 
-        public override get(_req: ApiRequest, id: string): ApiResponse {
+        protected override get(_req: ApiRequest, id: string): ApiResponse {
             const track = this.library.repositories.tracks.get(new Track.ID(id));
             if (track === null) return Track.Controller.notFound();
             return new JsonResponse(track.json());

@@ -80,15 +80,15 @@ namespace Album {
     }
 
     export class Controller extends ResourceController {
-        public override readonly path = ["albums"];
+        protected override readonly path = ["albums"];
 
-        public override list(req: ApiRequest): ApiResponse {
+        protected override list(req: ApiRequest): ApiResponse {
             const limit = req.limit();
             const albums = this.library.repositories.albums.list(limit);
             return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
         }
 
-        public override get(_req: ApiRequest, id: string): ApiResponse {
+        protected override get(_req: ApiRequest, id: string): ApiResponse {
             const album = this.library.repositories.albums.get(new Album.ID(id));
             if (album === null) return Album.Controller.notFound();
             return new JsonResponse(album.json());

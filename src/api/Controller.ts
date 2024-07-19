@@ -4,7 +4,7 @@ import ErrorResponse from "../response/ErrorResponse.js";
 
 export default abstract class Controller {
     public abstract handle(req: ApiRequest, _urlParts: string[]): Promise<ApiResponse> | ApiResponse;
-    public readonly subControllers: Controller[] = [];
+    protected readonly subControllers: Controller[] = [];
 
     protected runSubControllers(req: ApiRequest, urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         for (const controller of this.subControllers)
