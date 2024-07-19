@@ -82,7 +82,8 @@ namespace Artist {
     export class Controller extends ResourceController {
         public override readonly path = ["artists"];
         public override subControllers = [
-            new TracksController(this.library)
+            new AlbumsController(this.library),
+            new TracksController(this.library),
         ];
 
         public override list(req: ApiRequest): ApiResponse {
@@ -106,6 +107,18 @@ namespace Artist {
 
         public static notFound() {
             return new ErrorResponse(404, "The requested artist could not be found.");
+        }
+    }
+
+    class AlbumsController extends ResourceController {
+        public override readonly path = ["artists", null, "albums"];
+        public override readonly pathStartIndex = 2;
+        public override list(req: ApiRequest, urlParts: string[]): ApiResponse {
+            const artist = this.library.repositories.artists.get(new Artist.ID(urlParts[1]!));
+            if (artist === null) return Artist.Controller.notFound();
+            const limit = req.limit();
+            const albums = this.library.repositories.albums.artist(artist.id, limit);
+            return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
         }
     }
 
