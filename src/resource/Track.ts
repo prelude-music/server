@@ -66,12 +66,12 @@ class Track extends ApiResource {
             new Track.ID(row.id),
             row.title,
             new Artist.ID(row.artist),
-            !row.album ? null : new Album.ID(row.album),
+            row.album === null ? null : new Album.ID(row.album),
             new File(row.file),
-            row.year ?? null,
+            row.year,
             JSON.parse(row.genres),
-            !row.track_no ? null : {no: row.track_no, of: row.track_of},
-            !row.disk_no ? null : {no: row.disk_no, of: row.disk_of},
+            row.track_no === null ? null : {no: row.track_no, of: row.track_of},
+            row.disk_no === null ? null : {no: row.disk_no, of: row.disk_of},
             row.duration,
             JSON.parse(row.meta)
         );
