@@ -45,12 +45,12 @@ namespace Artist {
         public override get(id: Artist.ID) {
             const row = this.statements.get.get(id.id);
             if (row === undefined) return null;
-            return new Artist(id, row.name, row.image ?? null);
+            return new Artist(id, row.name, row.external_image);
         }
 
         public override list({limit, offset}: { limit: number, offset: number }) {
             return {
-                resources: this.statements.list.all(limit, offset).map(row => new Artist(new Artist.ID(row.id), row.name, row.image)),
+                resources: this.statements.list.all(limit, offset).map(row => new Artist(new Artist.ID(row.id), row.name, row.external_image)),
                 total: this.statements.count.get()!.count
             };
         }
