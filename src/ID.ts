@@ -7,7 +7,6 @@ export default class ID {
      * Create ID from the string representation of an ID.
      */
     public constructor(id: string) {
-        if (id.length !== 27 && id.length !== 26) throw new TypeError(`String (${id.length}) "${id}" does not look like a valid ID`);
         this.#id = id;
     }
 
