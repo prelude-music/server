@@ -112,8 +112,8 @@ namespace Track {
                 const stmts: Record<keyof typeof fields, {asc: Statement<[number, number], Record<string, any>>, desc: Statement<[number, number], any>}> = {} as any;
                 for (const field of fields) {
                     stmts[field as any] = {
-                        asc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` WHERE \`album\` = ? ORDER BY \`${field}\` LIMIT ? OFFSET ?`),
-                        desc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` WHERE \`album\` = ? ORDER BY \`${field}\` DESC LIMIT ? OFFSET ?`),
+                        asc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` ORDER BY \`${field}\` LIMIT ? OFFSET ?`),
+                        desc: this.database.prepare<[number, number], Record<string, any>>(`SELECT * FROM \`tracks\` ORDER BY \`${field}\` DESC LIMIT ? OFFSET ?`),
                     };
                 }
                 return stmts;
@@ -139,8 +139,8 @@ namespace Track {
             return Track.row(row);
         }
 
-        public override list({limit, offset, sort}: { limit: number, offset: number, sort?: string }) {
-            sort: if (sort !== undefined) {
+        public override list({limit, offset, sort}: { limit: number, offset: number, sort?: string | null }) {
+            sort: if (sort !== undefined && sort !== null) {
                 const parts = sort.split(":");
                 const col = parts[0];
                 if (col === undefined || !(col in this.statements.listSorted))

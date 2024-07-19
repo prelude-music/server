@@ -194,8 +194,8 @@ export default class Library {
     }
 
     public tracks(req: ApiRequest): JsonResponse {
-        const tracks = this.repositories.tracks.list(req.limit());
         const limit = req.limit();
+        const tracks = this.repositories.tracks.list({limit: limit.limit, offset: limit.offset, sort: req.url.searchParams.get("sort")});
         return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
     }
 
