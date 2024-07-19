@@ -4,3 +4,6 @@ node_modules/
 *.db
 *.db-shm
 *.db-wal
+.idea/dataSources/
+.idea/dataSources.xml
+.idea/dataSources.local.xml
