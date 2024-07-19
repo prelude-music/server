@@ -26,9 +26,11 @@ class Api {
             return;
         }
 
+        const urlParts = req.url.pathname.slice(1).split("/");
+
         for (const controller of this.controllers)
-            if (controller.match(req)) {
-                (await controller.handle(req)).send(req);
+            if (controller.match(req, urlParts)) {
+                (await controller.handle(req, urlParts)).send(req);
                 return;
             }
         return Controller.endpointNotFound(req).send(req);

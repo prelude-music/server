@@ -80,7 +80,7 @@ namespace Album {
     }
 
     export class Controller extends ResourceController {
-        public override readonly path = "/albums";
+        public override readonly path = ["albums"];
 
         public override list(req: ApiRequest): ApiResponse {
             const limit = req.limit();

@@ -210,7 +210,7 @@ namespace Track {
     }
 
     export class Controller extends ResourceController {
-        public override readonly path = "/tracks";
+        public override readonly path = ["tracks"];
 
         public override list(req: ApiRequest): ApiResponse {
             const sort = req.url.searchParams.get("sort");

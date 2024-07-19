@@ -80,7 +80,7 @@ namespace Artist {
     }
 
     export class Controller extends ResourceController {
-        public override readonly path = "/artists";
+        public override readonly path = ["artists"];
 
         public override list(req: ApiRequest): ApiResponse {
             const ids = req.url.searchParams.getAll("id");
