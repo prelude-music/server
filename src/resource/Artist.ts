@@ -48,6 +48,21 @@ namespace Artist {
             return new Artist(id, row.name, row.external_image);
         }
 
+        /**
+         * Get multiple artists by ID
+         * @param ids Array of artist IDs. Max 100.
+         */
+        public getMultiple(ids: Set<Artist.ID>): Artist[] {
+            const artists: Artist[] = [];
+            const iterations = Math.min(ids.size, 100);
+            const iterator = ids.values();
+            for (let i = 0; i < iterations; ++i) {
+                const artist = this.get(iterator.next().value)!;
+                if (artist !== null) artists.push(artist);
+            }
+            return artists;
+        }
+
         public override list({limit, offset}: { limit: number, offset: number }) {
             return {
                 resources: this.statements.list.all(limit, offset).map(row => new Artist(new Artist.ID(row.id), row.name, row.external_image)),
@@ -68,6 +83,13 @@ namespace Artist {
         public override readonly path = "/artists";
 
         public override list(req: ApiRequest): ApiResponse {
+            const ids = req.url.searchParams.getAll("id");
+            if (ids.length > 0) {
+                const idSet = new Set<Artist.ID>(ids.map(id => new Artist.ID(id)));
+                if (idSet.size > 100) return new ErrorResponse(400, `You can only query up to 100 artists at a time. (got ${idSet.size})`);
+                const artists = this.library.repositories.artists.getMultiple(idSet);
+                return new PageResponse(req, artists.map(a => a.json()), 1, idSet.size, artists.length);
+            }
             const limit = req.limit();
             const artists = this.library.repositories.artists.list(limit);
             return new PageResponse(req, artists.resources.map(a => a.json()), limit.page, limit.limit, artists.total);
