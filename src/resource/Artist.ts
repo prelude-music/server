@@ -2,6 +2,11 @@ import ID_ from "../ID.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import ApiResource from "../api/ApiResource.js";
+import ResourceController from "../api/ResourceController.js";
+import ApiRequest from "../api/ApiRequest.js";
+import ApiResponse from "../response/ApiResponse.js";
+import PageResponse from "../response/PageResponse.js";
+import ErrorResponse from "../response/ErrorResponse.js";
 
 class Artist extends ApiResource {
     public constructor(
@@ -56,6 +61,26 @@ namespace Artist {
 
         public override delete(id: Artist.ID) {
             this.statements.delete.run(id.id);
+        }
+    }
+
+    export class Controller extends ResourceController {
+        public override readonly path = "/artists";
+
+        public override list(req: ApiRequest): ApiResponse {
+            const limit = req.limit();
+            const artists = this.library.repositories.artists.list(limit);
+            return new PageResponse(req, artists.resources.map(a => a.json()), limit.page, limit.limit, artists.total);
+        }
+
+        public override get(_req: ApiRequest, id: string): ApiResponse {
+            const artist = this.library.repositories.artists.get(new Artist.ID(id));
+            if (artist === null) return Artist.Controller.notFound();
+            return new JsonResponse(artist.json());
+        }
+
+        public static notFound() {
+            return new ErrorResponse(404, "The requested artist could not be found.");
         }
     }
 }

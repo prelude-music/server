@@ -6,9 +6,6 @@ import Artist from "./resource/Artist.js";
 import Album from "./resource/Album.js";
 import Track from "./resource/Track.js";
 import Config from "./Config.js";
-import PageResponse from "./response/PageResponse.js";
-import JsonResponse from "./response/JsonResponse.js";
-import ApiRequest from "./api/ApiRequest.js";
 
 export default class Library {
     /**
@@ -191,23 +188,5 @@ export default class Library {
         }
         await Promise.all(promises);
         return added;
-    }
-
-    public tracks(req: ApiRequest): JsonResponse {
-        const limit = req.limit();
-        const tracks = this.repositories.tracks.list({limit: limit.limit, offset: limit.offset, sort: req.url.searchParams.get("sort")});
-        return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
-    }
-
-    public albums(req: ApiRequest): JsonResponse {
-        const albums = this.repositories.albums.list(req.limit());
-        const limit = req.limit();
-        return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
-    }
-
-    public artists(req: ApiRequest): JsonResponse {
-        const artists = this.repositories.artists.list(req.limit());
-        const limit = req.limit();
-        return new PageResponse(req, artists.resources.map(a => a.json()), limit.page, limit.limit, artists.total);
     }
 }

@@ -3,6 +3,11 @@ import Artist from "./Artist.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import ApiResource from "../api/ApiResource.js";
+import ResourceController from "../api/ResourceController.js";
+import ApiRequest from "../api/ApiRequest.js";
+import ApiResponse from "../response/ApiResponse.js";
+import PageResponse from "../response/PageResponse.js";
+import ErrorResponse from "../response/ErrorResponse.js";
 
 class Album extends ApiResource {
     public constructor(
@@ -71,6 +76,26 @@ namespace Album {
                 resources: this.statements.artist.all(artist.id, limit, offset).map(row => new Album(new Album.ID(row.id), row.title, new Artist.ID(row.artist))),
                 total: this.statements.countArtist.get(artist.id)!.count
             };
+        }
+    }
+
+    export class Controller extends ResourceController {
+        public override readonly path = "/albums";
+
+        public override list(req: ApiRequest): ApiResponse {
+            const limit = req.limit();
+            const albums = this.library.repositories.albums.list(limit);
+            return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
+        }
+
+        public override get(_req: ApiRequest, id: string): ApiResponse {
+            const album = this.library.repositories.albums.get(new Album.ID(id));
+            if (album === null) return Album.Controller.notFound();
+            return new JsonResponse(album.json());
+        }
+
+        public static notFound() {
+            return new ErrorResponse(404, "The requested album could not be found.");
         }
     }
 }

@@ -1,21 +1,15 @@
 import http from "node:http";
-import EnhancedSwitch from "enhanced-switch";
-import ApiResponse from "../response/ApiResponse.js";
-import ErrorResponse from "../response/ErrorResponse.js";
-import JsonResponse from "../response/JsonResponse.js";
-import Library from "../Library.js";
-import FileResponse from "../response/FileResponse.js";
-import BufferResponse from "../response/BufferResponse.js";
-import Track from "../resource/Track.js";
-import Artist from "../resource/Artist.js";
-import Album from "../resource/Album.js";
 import ApiRequest from "./ApiRequest.js";
+import Controller from "./Controller.js";
+import ApiResponse from "../response/ApiResponse.js";
+import JsonResponse from "../response/JsonResponse.js";
 
-export default class Api {
+class Api {
     public constructor(
-        private readonly library: Library,
+        private readonly controllers: Controller[],
         private readonly packageJson: JsonResponse.Object
     ) {
+        this.controllers.unshift(new Api.RootController(this.packageJson.version as string));
     }
 
     public async requestListener(q: http.IncomingMessage, s: http.ServerResponse): Promise<void> {
@@ -32,91 +26,31 @@ export default class Api {
             return;
         }
 
-        const endpointNotFound = new ErrorResponse(404, "The requested endpoint `" + req.url.pathname + "` does not exist.");
-
-        const parts = req.url.pathname.split("/").filter(p => p.length > 0);
-
-        if (parts.length === 0)
-            return new JsonResponse({
-                version: this.packageJson.version
-            }).send(req);
-
-        (await new EnhancedSwitch<string | undefined, ApiResponse | Promise<ApiResponse>>(parts[0])
-            .case("tracks", async () => {
-                if (parts.length === 1) {
-                    return new EnhancedSwitch<typeof http.METHODS[number], ApiResponse>(req.method)
-                        .case("GET", this.library.tracks(req))
-                        .default(new ErrorResponse(405, "The HTTP method `" + req.method + "` is not allowed for endpoint `" + req.url.pathname + "`."))
-                        .value;
-                }
-                else {
-                    const track = this.library.repositories.tracks.get(new Track.ID(parts[1]!));
-                    if (track === null)
-                        return new ErrorResponse(404, "The requested track is not part of this library.");
-
-                    if (parts.length === 2)
-                        return new JsonResponse(track.json());
-
-                    else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
-                        .case("audio", new FileResponse(track.file))
-                        .case("image", async () => {
-                            const image = await track.cover();
-                            if (image === null)
-                                return new ErrorResponse(404, "No cover art available for this track.");
-                            return new BufferResponse(image.data, image.type);
-                        })
-                        .default(endpointNotFound)
-                        .value;
-                }
-            })
-            .case("albums", async () => {
-                if (parts.length === 1) {
-                    return new EnhancedSwitch<typeof http.METHODS[number], ApiResponse>(req.method)
-                        .case("GET", this.library.albums(req))
-                        .default(new ErrorResponse(405, "The HTTP method `" + req.method + "` is not allowed for endpoint `" + req.url.pathname + "`."))
-                        .value;
-                }
-                else {
-                    const album = this.library.repositories.albums.get(new Album.ID(parts[1]!));
-                    if (album === null)
-                        return new ErrorResponse(404, "The requested album is not part of this library.");
-
-                    if (parts.length === 2)
-                        return new JsonResponse(album.json());
-                    else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
-                        /*.case("tracks", PageResponse.from(req, album.tracks(), track => track.get()))
-                        .case("image", async () => {
-                            const image = await album.cover();
-                            if (image === null)
-                                return new ErrorResponse(404, "No cover art available for this album.");
-                            return new BufferResponse(image.data, image.type);
-                        })*/
-                        .default(endpointNotFound)
-                        .value;
-                }
-            })
-            .case("artists", async () => {
-                if (parts.length === 1) {
-                    return new EnhancedSwitch<typeof http.METHODS[number], ApiResponse>(req.method)
-                        .case("GET", this.library.artists(req))
-                        .default(new ErrorResponse(405, "The HTTP method `" + req.method + "` is not allowed for endpoint `" + req.url.pathname + "`."))
-                        .value;
-                }
-                else {
-                    const artist = this.library.repositories.artists.get(new Artist.ID(parts[1]!));
-                    if (artist === null)
-                        return new ErrorResponse(404, "The requested artist is not part of this library.");
-                    if (parts.length === 2)
-                        return new JsonResponse(artist.json());
-                    else return new EnhancedSwitch<string, ApiResponse | Promise<ApiResponse>>(parts[2]!)
-                        /*.case("tracks", PageResponse.from(req, artist.tracks(), track => track.get()))
-                        .case("albums", PageResponse.from(req, artist.albums(), album => album.get()))*/
-                        .default(endpointNotFound)
-                        .value;
-                }
-            })
-            .default(endpointNotFound)
-            .value)
-            .send(req);
+        for (const controller of this.controllers)
+            if (controller.match(req)) {
+                (await controller.handle(req)).send(req);
+                return;
+            }
+        return Controller.endpointNotFound(req).send(req);
     }
 }
+
+namespace Api {
+    export class RootController extends Controller {
+        public constructor(private readonly version: string) {
+            super();
+        }
+
+
+        public override match(req: ApiRequest): boolean {
+            return req.url.pathname === "/";
+        }
+
+        public override handle(req: ApiRequest): ApiResponse {
+            if (req.method === "GET") return new JsonResponse({version: this.version});
+            return Controller.methodNotAllowed(req);
+        }
+    }
+}
+
+export default Api;

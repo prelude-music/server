@@ -5,6 +5,9 @@ import SystemFile from "./SystemFile.js";
 import JsonResponse from "./response/JsonResponse.js";
 import File from "./File.js";
 import Database from "./db/Database.js";
+import Artist from "./resource/Artist.js";
+import Album from "./resource/Album.js";
+import Track from "./resource/Track.js";
 
 const configArgIndex = process.argv.findIndex(arg => arg === "--config" || arg === "-c");
 const customConfig = configArgIndex >= 0 && process.argv.length > configArgIndex + 1;
@@ -34,7 +37,11 @@ const db = new Database(config.db);
 console.log("Initialising database...");
 await db.init();
 const library = new Library(db, config);
-const server = await new Server(config, library, packageJson).listen();
+const server = await new Server(config, packageJson, [
+    new Artist.Controller(library),
+    new Album.Controller(library),
+    new Track.Controller(library),
+]).listen();
 console.log(`Server listening on http://0.0.0.0:${config.port}`);
 
 console.log("Reloading library... (this may take a while)");

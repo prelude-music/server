@@ -7,6 +7,11 @@ import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import {Statement} from "better-sqlite3";
 import ApiResource from "../api/ApiResource.js";
+import ResourceController from "../api/ResourceController.js";
+import ApiRequest from "../api/ApiRequest.js";
+import ApiResponse from "../response/ApiResponse.js";
+import PageResponse from "../response/PageResponse.js";
+import ErrorResponse from "../response/ErrorResponse.js";
 
 class Track extends ApiResource {
     public constructor(
@@ -201,6 +206,27 @@ namespace Track {
                 resources: this.statements.album.all(album.id, limit, offset).map(Track.row),
                 total: this.statements.countAlbum.get(album.id)!.count
             };
+        }
+    }
+
+    export class Controller extends ResourceController {
+        public override readonly path = "/tracks";
+
+        public override list(req: ApiRequest): ApiResponse {
+            const sort = req.url.searchParams.get("sort");
+            const limit = req.limit();
+            const tracks = this.library.repositories.tracks.list({limit: limit.limit, offset: limit.offset, sort});
+            return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
+        }
+
+        public override get(_req: ApiRequest, id: string): ApiResponse {
+            const track = this.library.repositories.tracks.get(new Track.ID(id));
+            if (track === null) return Track.Controller.notFound();
+            return new JsonResponse(track.json());
+        }
+
+        public static notFound() {
+            return new ErrorResponse(404, "The requested track could not be found.");
         }
     }
 }
