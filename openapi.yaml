@@ -1,0 +1,679 @@
+openapi: 3.0.3
+info:
+  title: Prelude API
+  version: 0.0.0
+  description: Prelude music server REST API specification
+  license:
+    name: GNU General Public License v3.0
+    url: https://github.com/prelude-music/server/blob/main/LICENSE
+tags:
+  - name: Artists
+  - name: Albums
+  - name: Tracks
+paths:
+  /artists:
+    get:
+      tags:
+        - Artists
+      summary: List artists
+      parameters:
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - in: query
+          description: Get up to 100 artists by ID. If this is used, `limit` and `page` are ignored since all results are returned in a single page
+          name: id
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: List of artists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of artists in the library
+                    example: 191
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: '/artists?limit=100&page=2'
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Artist'
+  /artists/{id}:
+    get:
+      tags:
+        - Artists
+      summary: Get artist by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Artist/properties/id'
+      responses:
+        '200':
+          description: An artist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '404':
+          description: The requested artist could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /artists/{id}/albums:
+    get:
+      tags:
+        - Artists
+      summary: List artist's albums
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Artist/properties/id'
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: List of artist's albums
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of albums in the library of this artist
+                    example: 24
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: null
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Album'
+  /artists/{id}/tracks:
+    get:
+      tags:
+        - Artists
+      summary: List artist's tracks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Artist/properties/id'
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: List of artist's tracks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of tracks in the library of this artist
+                    example: 24
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: null
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+  /artists/{id}/image:
+    get:
+      tags:
+        - Artists
+      summary: Get artist's image
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Artist/properties/id'
+      responses:
+        '200':
+          description: The artist's image
+          content:
+            image/*: {}
+        '404':
+          description: The artist does not have an associated image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /albums:
+    get:
+      tags:
+        - Albums
+      summary: List albums
+      parameters:
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: List of albums
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of albums in the library
+                    example: 117
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: '/albums?limit=100&page=2'
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Album'
+  /albums/{id}:
+    get:
+      tags:
+        - Albums
+      summary: Get album by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Album/properties/id'
+      responses:
+        '200':
+          description: An album
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '404':
+          description: The requested album could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /albums/{id}/tracks:
+    get:
+      tags:
+        - Albums
+      summary: List tracks in album
+      description: The tracks are always sorted by `Track#track.no` (if available).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Album/properties/id'
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: List of tracks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of tracks in the album
+                    example: 24
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: null
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+  /albums/{id}/image:
+    get:
+      tags:
+        - Albums
+      summary: Get album's image
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Album/properties/id'
+      responses:
+        '200':
+          description: The album's image
+          content:
+            image/*: {}
+        '404':
+          description: The album does not have an associated image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tracks:
+    get:
+      tags:
+        - Tracks
+      summary: List tracks
+      parameters:
+        - in: query
+          description: Number of resources to return per page
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+        - in: query
+          description: Page number to return
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - in: query
+          description: Sort tracks
+          name: sort
+          schema:
+            type: string
+            enum:
+              - title:asc
+              - title:desc
+              - year:asc
+              - year:desc
+              - track_no:asc
+              - track_no:desc
+              - duration:asc
+              - duration:desc
+            example: duration:desc
+      responses:
+        '200':
+          description: List of tracks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    description: Current page
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Number of resources per page
+                    example: 100
+                  total:
+                    type: integer
+                    description: Total number of tracks
+                    example: 284
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Path to the previous page; null if this is the first page
+                    example: null
+                  next:
+                    type: string
+                    nullable: true
+                    description: Path to the next page, null if this is the last page
+                    example: /tracks?limit=100&page=2&sort=duration%3Adesc
+                  resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+  /tracks/{id}:
+    get:
+      tags:
+        - Tracks
+      summary: Get track
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Track/properties/id'
+      responses:
+        '200':
+          description: The requested track
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+        '404':
+          description: The requested track could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tracks/{id}/audio:
+    get:
+      tags:
+        - Tracks
+      summary: Get track's audio
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Track/properties/id'
+      responses:
+        '200':
+          description: The track's audio
+          content:
+            audio/aiff: {}
+            audio/aac: {}
+            audio/ape: {}
+            audio/asf: {}
+            audio/x-bwf: {}
+            audio/x-dff: {}
+            audio/x-dsf: {}
+            audio/flac: {}
+            audio/mpeg: {}
+            audio/x-matroska: {}
+            video/x-matroska: {}
+            audio/musepack: {}
+            audio/mp4: {}
+            audio/ogg: {}
+            audio/opus: {}
+            audio/speex: {}
+            video/ogg: {}
+            audio/vorbis: {}
+            audio/wav: {}
+            audio/webm: {}
+            audio/wavpack: {}
+            audio/x-ms-wma: {}
+        '404':
+          description: The track does not have an associated audio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tracks/{id}/image:
+    get:
+      tags:
+        - Tracks
+      summary: Get track's image
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Track/properties/id'
+      responses:
+        '200':
+          description: The track's image
+          content:
+            image/*: {}
+        '404':
+          description: The track does not have an associated image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+          title: Artist ID
+          example: "h0+wZAY3FUjqOPmL1WODJCH1L44"
+        name:
+          type: string
+          title: Name of the artist
+          example: "Johann Sebastian Bach"
+        image:
+          type: string
+          title: Artist image
+          format: uri
+          nullable: true
+          example: 'https://example.com/image.jpg'
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+          title: Album ID
+          example: "GxLAk47P9IJnxLHcW2WKJ+a0Wv4"
+        name:
+          type: string
+          title: Album name
+          example: "The Well-Tempered Clavier. Book I"
+        artist:
+          $ref: '#/components/schemas/Artist/properties/id'
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+          title: Track ID
+          example: "lJzqGqUGjPdAI+bEOrtHeLstgTU"
+        title:
+          type: string
+          title: Track title
+          example: "Prelude and Fugue in C Minor, BWV 847"
+        artist:
+          $ref: '#/components/schemas/Artist/properties/id'
+        album:
+          allOf:
+            - $ref: '#/components/schemas/Album/properties/id'
+          nullable: true
+        year:
+          type: integer
+          title: Track year
+          example: 1722
+          nullable: true
+        genres:
+          type: array
+          items:
+            type: string
+          title: Track genres
+          example: [ "classical" ]
+        track:
+          type: object
+          nullable: true
+          properties:
+            no:
+              type: integer
+              title: Track number
+              example: 2
+            of:
+              type: integer
+              title: Of total tracks
+              example: 24
+              nullable: true
+        disk:
+          type: object
+          nullable: true
+          properties:
+            no:
+              type: integer
+              title: Disk number
+              example: 1
+            of:
+              type: integer
+              title: Of total disks
+              example: 2
+              nullable: true
+        duration:
+          type: integer
+          title: Track duration
+          description: Track duration in seconds
+          example: 180
+        meta:
+          type: object
+          title: Track meta
+          properties:
+            channels:
+              type: integer
+              description: Number of audio channels
+              example: 2
+            sampleRate:
+              type: integer
+              description: Sample rate in Hz
+              example: 44100
+            bitrate:
+              type: integer
+              description: Bitrate in bits per second
+              example: 128012
+            lossless:
+              type: boolean
+              description: Whether the audio file is in a lossless/uncompressed format
+              example: false
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "A user-friendly error message."
