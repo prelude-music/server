@@ -54,7 +54,7 @@ class Track extends ApiResource {
         }
     }
 
-    public async cover(): Promise<{ type: string, data: Buffer } | null> {
+    public async cover(): Promise<{ type: string, data: Uint8Array } | null> {
         const meta = await getMetadataFromFile(this.file.path);
         if (meta.common.picture === undefined || meta.common.picture!.length === 0) return null;
         const pic = meta.common.picture!.length === 1 ? meta.common.picture![0] : meta.common.picture!.find(p => ["cover", "front", "album"].some(t => p.type?.toLowerCase().includes(t)));
