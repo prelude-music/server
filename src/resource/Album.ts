@@ -4,10 +4,13 @@ import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import ApiResource from "../api/ApiResource.js";
 import ResourceController from "../api/ResourceController.js";
+import Controller_ from "../api/Controller.js";
 import ApiRequest from "../api/ApiRequest.js";
 import ApiResponse from "../response/ApiResponse.js";
 import PageResponse from "../response/PageResponse.js";
 import ErrorResponse from "../response/ErrorResponse.js";
+import Library from "../Library.js";
+import BufferResponse from "../response/BufferResponse.js";
 
 class Album extends ApiResource {
     public constructor(
@@ -83,6 +86,7 @@ namespace Album {
         protected override readonly path = ["albums"];
         protected override subControllers = [
             new TracksController(this.library),
+            new ImageController(this.library),
         ]
 
         protected override list(req: ApiRequest): ApiResponse {
@@ -112,6 +116,37 @@ namespace Album {
             const limit = req.limit();
             const tracks = this.library.repositories.tracks.album(album.id, limit);
             return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
+        }
+    }
+
+    class ImageController extends Controller_ {
+        public constructor(protected readonly library: Library) {
+            super();
+        }
+
+        public override match(_req: ApiRequest, urlParts: string[]): boolean {
+            return urlParts.length === 3 && urlParts[2] === "image";
+        }
+
+        public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
+            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            const album = this.library.repositories.albums.get(new Album.ID(urlParts[1]!));
+            if (album === null) return Album.Controller.notFound();
+            const tracks = this.library.repositories.tracks.album(album.id, {limit: 5, offset: 0});
+            for (const track of tracks.resources) {
+                if (!await track.file.isReadable()) {
+                    this.library.removeTrack(track);
+                    continue;
+                }
+                const image = await track.cover();
+                if (image !== null)
+                    return new BufferResponse(image.data, image.type);
+            }
+            return ImageController.notFound(album);
+        }
+
+        public static notFound(album: Album) {
+            return new ErrorResponse(404, `Album "${album.id}" (${album.title}) does not have an associated cover image.`);
         }
     }
 }
