@@ -81,6 +81,9 @@ namespace Album {
 
     export class Controller extends ResourceController {
         protected override readonly path = ["albums"];
+        protected override subControllers = [
+            new TracksController(this.library),
+        ]
 
         protected override list(req: ApiRequest): ApiResponse {
             const limit = req.limit();
@@ -96,6 +99,19 @@ namespace Album {
 
         public static notFound() {
             return new ErrorResponse(404, "The requested album could not be found.");
+        }
+    }
+
+    class TracksController extends ResourceController {
+        protected override readonly path = ["albums", null, "tracks"];
+        protected override readonly pathStartIndex = 2;
+
+        protected override list(req: ApiRequest, urlParts: string[]): ApiResponse {
+            const album = this.library.repositories.albums.get(new Album.ID(urlParts[1]!));
+            if (album === null) return Album.Controller.notFound();
+            const limit = req.limit();
+            const tracks = this.library.repositories.tracks.album(album.id, limit);
+            return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
         }
     }
 }
