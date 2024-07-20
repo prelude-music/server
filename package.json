@@ -20,6 +20,7 @@
     "enhanced-switch": "^1.1.6",
     "json5": "^2.2.3",
     "mime": "^4.0.4",
-    "music-metadata": "^8.3.0"
+    "music-metadata": "^8.3.0",
+    "source-map-support": "^0.5.21"
   }
 }

@@ -1,3 +1,4 @@
+import 'source-map-support/register.js'
 import Server from "./Server.js";
 import Config from "./Config.js";
 import Library from "./Library.js";
