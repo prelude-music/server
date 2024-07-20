@@ -132,7 +132,7 @@ namespace Track {
             delete: this.database.prepare<[string], void>("DELETE FROM `tracks` WHERE `id` = ?"),
             artist: this.database.prepare<[string, number, number], Record<string, any>>("SELECT * FROM `tracks` WHERE `artist` = ? ORDER BY `year` DESC LIMIT ? OFFSET ?"),
             countArtist: this.database.prepare<[string], { count: number }>("SELECT COUNT(*) as count FROM `tracks` WHERE `artist` = ?"),
-            album: this.database.prepare<[string, number, number], Record<string, any>>("SELECT * FROM `tracks` WHERE `album` = ? ORDER BY `track_no` DESC LIMIT ? OFFSET ?"),
+            album: this.database.prepare<[string, number, number], Record<string, any>>("SELECT * FROM `tracks` WHERE `album` = ? ORDER BY `track_no` ASC LIMIT ? OFFSET ?"),
             countAlbum: this.database.prepare<[string], { count: number }>("SELECT COUNT(*) as count FROM `tracks` WHERE `album` = ?"),
         } as const;
 
