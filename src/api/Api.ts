@@ -1,8 +1,11 @@
 import http from "node:http";
+import YAML from "yaml";
 import ApiRequest from "./ApiRequest.js";
 import Controller from "./Controller.js";
 import ApiResponse from "../response/ApiResponse.js";
 import JsonResponse from "../response/JsonResponse.js";
+import FileResponse from "../response/FileResponse.js";
+import SystemFile from "../SystemFile.js";
 
 class Api {
     public constructor(
@@ -43,14 +46,30 @@ namespace Api {
             super();
         }
 
+        private readonly paths = ["/", "/openapi.yaml", "/openapi.json"] as const;
+
+        private readonly openApi = new SystemFile("/openapi.yaml");
 
         public override match(req: ApiRequest): boolean {
-            return req.url.pathname === "/";
+            return this.paths.includes(req.url.pathname as typeof this.paths[number]);
         }
 
-        public override handle(req: ApiRequest): ApiResponse {
-            if (req.method === "GET") return new JsonResponse({version: this.version});
-            return Controller.methodNotAllowed(req);
+        public override async handle(req: ApiRequest): Promise<ApiResponse> {
+            if (req.method !== "GET") return Controller.methodNotAllowed(req);
+            switch (req.url.pathname as typeof this.paths[number]) {
+                case "/": return new JsonResponse({
+                    version: this.version,
+                    spec: {
+                        json: "/openapi.json",
+                        yaml: "/openapi.yaml"
+                    }
+                });
+                case "/openapi.yaml": return new FileResponse(this.openApi);
+                case "/openapi.json": {
+                    const data = await this.openApi.buffer();
+                    return new JsonResponse(YAML.parse(data.toString("utf8")));
+                }
+            }
         }
     }
 }
