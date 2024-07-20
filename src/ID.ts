@@ -6,7 +6,7 @@ export default class ID {
     /**
      * Create ID from the string representation of an ID.
      */
-    public constructor(id: string) {
+    protected constructor(id: string) {
         this.#id = id;
     }
 

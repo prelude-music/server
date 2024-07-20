@@ -32,6 +32,10 @@ class Album extends ApiResource {
 
 namespace Album {
     export class ID extends ID_ {
+        public constructor(id: string) {
+            super(id);
+        }
+
         public static override of(name: string, artist: Artist.ID): ID {
             return super.of(name, artist.id);
         }

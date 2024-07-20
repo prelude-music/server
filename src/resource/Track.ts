@@ -84,6 +84,10 @@ class Track extends ApiResource {
 
 namespace Track {
     export class ID extends ID_ {
+        public constructor(id: string) {
+            super(id);
+        }
+
         public static override of(title: string, artist: Artist.ID, album?: Album.ID | null): ID {
             return super.of(title, artist.id, album?.id);
         }

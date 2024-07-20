@@ -31,6 +31,10 @@ class Artist extends ApiResource {
 
 namespace Artist {
     export class ID extends ID_ {
+        public constructor(id: string) {
+            super(id);
+        }
+        
         public static override of(name: string): ID {
             return super.of(name);
         }
