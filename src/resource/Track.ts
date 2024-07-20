@@ -8,10 +8,14 @@ import Repository_ from "../Repository.js";
 import {Statement} from "better-sqlite3";
 import ApiResource from "../api/ApiResource.js";
 import ResourceController from "../api/ResourceController.js";
+import Controller_ from "../api/Controller.js";
 import ApiRequest from "../api/ApiRequest.js";
 import ApiResponse from "../response/ApiResponse.js";
 import PageResponse from "../response/PageResponse.js";
 import ErrorResponse from "../response/ErrorResponse.js";
+import FileResponse from "../response/FileResponse.js";
+import Library from "../Library.js";
+import BufferResponse from "../response/BufferResponse.js";
 
 class Track extends ApiResource {
     public constructor(
@@ -211,6 +215,10 @@ namespace Track {
 
     export class Controller extends ResourceController {
         protected override readonly path = ["tracks"];
+        protected override readonly subControllers = [
+            new AudioController(this.library),
+            new ImageController(this.library),
+        ];
 
         protected override list(req: ApiRequest): ApiResponse {
             const sort = req.url.searchParams.get("sort");
@@ -227,6 +235,54 @@ namespace Track {
 
         public static notFound() {
             return new ErrorResponse(404, "The requested track could not be found.");
+        }
+    }
+
+    class AudioController extends Controller_ {
+        public constructor(protected readonly library: Library) {
+            super();
+        }
+
+        public override match(_req: ApiRequest, urlParts: string[]): boolean {
+            return urlParts.length === 3 && urlParts[2] === "audio";
+        }
+
+        public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
+            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            const track = this.library.repositories.tracks.get(new Track.ID(urlParts[1]!));
+            if (track === null) return Track.Controller.notFound();
+            if (!await track.file.isReadable()) {
+                this.library.removeTrack(track);
+                return Track.Controller.notFound();
+            }
+            return new FileResponse(track.file);
+        }
+    }
+
+    class ImageController extends Controller_ {
+        public constructor(protected readonly library: Library) {
+            super();
+        }
+
+        public override match(_req: ApiRequest, urlParts: string[]): boolean {
+            return urlParts.length === 3 && urlParts[2] === "image";
+        }
+
+        public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
+            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            const track = this.library.repositories.tracks.get(new Track.ID(urlParts[1]!));
+            if (track === null) return Track.Controller.notFound();
+            if (!await track.file.isReadable()) {
+                this.library.removeTrack(track);
+                return Track.Controller.notFound();
+            }
+            const image = await track.cover();
+            if (image === null) return ImageController.notFound(track);
+            return new BufferResponse(image.data, image.type);
+        }
+
+        public static notFound(track: Track) {
+            return new ErrorResponse(404, `Track "${track.id}" (${track.title}) does not have an associated cover image.`);
         }
     }
 }
