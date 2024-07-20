@@ -106,7 +106,7 @@ export default class Library {
             {
                 channels: meta.format.numberOfChannels ?? 0,
                 sampleRate: meta.format.sampleRate ?? 0,
-                bitrate: meta.format.bitrate ?? 0,
+                bitrate: Math.round(meta.format.bitrate ?? 0),
                 lossless: meta.format.lossless ?? false
             }
         );
