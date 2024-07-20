@@ -26,7 +26,7 @@ class Api {
             return;
         }
 
-        const urlParts = req.url.pathname.slice(1).split("/");
+        const urlParts = (req.url.pathname.endsWith("/") ? req.url.pathname.slice(0, -1) : req.url.pathname).slice(1).split("/");
 
         for (const controller of this.controllers)
             if (controller.match(req, urlParts)) {
