@@ -3,10 +3,13 @@ import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import ApiResource from "../api/ApiResource.js";
 import ResourceController from "../api/ResourceController.js";
+import Controller_ from "../api/Controller.js";
 import ApiRequest from "../api/ApiRequest.js";
 import ApiResponse from "../response/ApiResponse.js";
 import PageResponse from "../response/PageResponse.js";
 import ErrorResponse from "../response/ErrorResponse.js";
+import Library from "../Library.js";
+import ProxyResponse from "../response/ProxyResponse.js";
 
 class Artist extends ApiResource {
     public constructor(
@@ -84,6 +87,7 @@ namespace Artist {
         protected override subControllers = [
             new AlbumsController(this.library),
             new TracksController(this.library),
+            new ImageController(this.library),
         ];
 
         protected override list(req: ApiRequest): ApiResponse {
@@ -131,6 +135,32 @@ namespace Artist {
             const limit = req.limit();
             const tracks = this.library.repositories.tracks.artist(artist.id, limit);
             return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
+        }
+    }
+
+    class ImageController extends Controller_ {
+        public constructor(protected readonly library: Library) {
+            super();
+        }
+
+        public override match(_req: ApiRequest, urlParts: string[]): boolean {
+            return urlParts.length === 3 && urlParts[2] === "image";
+        }
+
+        public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
+            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            const artist = this.library.repositories.artists.get(new Artist.ID(urlParts[1]!));
+            if (artist === null) return Artist.Controller.notFound();
+            if (artist.externalImage === null) return ImageController.notFound(artist);
+            const init: RequestInit = {
+                method: "GET"
+            };
+            if (req.headers.range) init.headers = {Range: req.headers.range};
+            return new ProxyResponse(artist.externalImage, init, false, 200, /^image\/.+$/);
+        }
+
+        public static notFound(artist: Artist) {
+            return new ErrorResponse(404, `Artist "${artist.id}" (${artist.name}) does not have an associated image.`);
         }
     }
 }
