@@ -1,5 +1,5 @@
 import ApiResponse from "./ApiResponse.js";
-import Api from "../api/Api.js";
+import ApiRequest from "../api/ApiRequest.js";
 
 export default class BufferResponse extends ApiResponse {
     public constructor(
@@ -10,7 +10,7 @@ export default class BufferResponse extends ApiResponse {
         super(status);
     }
 
-    public override send(req: Api.Request) {
+    public override send(req: ApiRequest) {
         req.res.setHeader("Content-Type", this.contentType);
         req.res.end(this.buffer);
     }

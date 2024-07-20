@@ -1,12 +1,12 @@
 import JsonResponse from "./JsonResponse.js";
-import Api from "../api/Api.js";
+import ApiRequest from "../api/ApiRequest.js";
 
 export default class ErrorResponse extends JsonResponse {
     public constructor(status: number, message: string, private readonly cause?: Error) {
         super({error: {message}}, status);
     }
 
-    public override send(req: Api.Request): void {
+    public override send(req: ApiRequest): void {
         req.res.statusCode = this.status;
         super.send(req);
 

@@ -1,14 +1,14 @@
 import ApiResponse from "./ApiResponse.js";
 import File from "../File.js";
-import Api from "../api/Api.js";
 import ErrorResponse from "./ErrorResponse.js";
+import ApiRequest from "../api/ApiRequest.js";
 
 class FileResponse extends ApiResponse {
     public constructor(public readonly file: File, status: number = 200) {
         super(status);
     }
 
-    public override async send(req: Api.Request) {
+    public override async send(req: ApiRequest) {
         let stats;
         try {
             stats = await this.file.stat();

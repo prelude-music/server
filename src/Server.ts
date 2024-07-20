@@ -1,19 +1,19 @@
 import http from "node:http";
 import EnhancedSwitch from "enhanced-switch";
 import Config from "./Config.js";
-import Library from "./Library.js";
 import Api from "./api/Api.js";
 import JsonResponse from "./response/JsonResponse.js";
+import Controller from "./api/Controller.js";
 
 export default class Server {
     private readonly http: http.Server;
 
     public constructor(
         public readonly config: Config,
-        public readonly library: Library,
-        public readonly packageJson: JsonResponse.Object
+        packageJson: JsonResponse.Object,
+        controllers: Controller[],
     ) {
-        const api = new Api(library, packageJson);
+        const api = new Api(controllers,packageJson);
         this.http = http.createServer<typeof http.IncomingMessage, typeof http.ServerResponse>(api.requestListener.bind(api));
     }
 

@@ -1,5 +1,5 @@
 import ApiResponse from "./ApiResponse.js";
-import Api from "../api/Api.js";
+import ApiRequest from "../api/ApiRequest.js";
 
 class JsonResponse extends ApiResponse {
     private readonly data: Readonly<JsonResponse.Object | JsonResponse.Array>;
@@ -9,7 +9,7 @@ class JsonResponse extends ApiResponse {
         this.data = Object.freeze(data);
     }
 
-    public override send(req: Api.Request): void {
+    public override send(req: ApiRequest): void {
         req.res.setHeader("Content-Type", "application/json");
         req.res.end(JSON.stringify(this.data));
     }
