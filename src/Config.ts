@@ -45,6 +45,33 @@ export default class Config {
     }
 
     public static async fromFile(file: File): Promise<Config> {
-        return new Config(await file.json<JsonResponse.Object>());
+        const json = await file.json<JsonResponse.Object>();
+        const options: ConstructorParameters<typeof Config>[0] = {};
+
+        if ("port" in json) {
+            if (typeof json.port !== "number")
+                throw new TypeError(`Config option "port" must be a number; got (${typeof json.port}) ${json.port}`);
+            options.port = json.port;
+        }
+
+        if ("discoverPaths" in json) {
+            if (!Array.isArray(json.discoverPaths) || !json.discoverPaths.every(p => typeof p === "string"))
+                throw new TypeError(`Config option "discoverPaths" must be an array of strings; got (${typeof json.discoverPaths}) ${json.discoverPaths}`);
+            options.discoverPaths = json.discoverPaths;
+        }
+
+        if ("unknownArtist" in json) {
+            if (typeof json.unknownArtist !== "string")
+                throw new TypeError(`Config option "unknownArtist" must be a string; got (${typeof json.unknownArtist}) ${json.unknownArtist}`);
+            options.unknownArtist = json.unknownArtist;
+        }
+
+        if ("db" in json) {
+            if (typeof json.db !== "string")
+                throw new TypeError(`Config option "db" must be a string; got (${typeof json.db}) ${json.db}`);
+            options.db = new SystemFile(json.db);
+        }
+
+        return new Config(options);
     }
 }
