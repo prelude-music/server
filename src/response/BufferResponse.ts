@@ -3,7 +3,7 @@ import ApiRequest from "../api/ApiRequest.js";
 
 export default class BufferResponse extends ApiResponse {
     public constructor(
-        public readonly buffer: Buffer,
+        public readonly buffer: Uint8Array,
         public readonly contentType: string = "application/octet-stream",
         status: number = 200
     ) {
