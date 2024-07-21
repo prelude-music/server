@@ -1,6 +1,5 @@
 import {parseFile as getMetadataFromFile} from "music-metadata";
 import File from "./File.js";
-//import SpotifyApi from "./SpotifyApi.js";
 import Database from "./db/Database.js";
 import Artist from "./resource/Artist.js";
 import Album from "./resource/Album.js";
@@ -35,8 +34,6 @@ export default class Library {
         "wv",                  // WV
         "wma"                  // WMA
     ];
-
-    //private static readonly spotify = new SpotifyApi("https://api.spotify.com");
 
     public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository };
 
