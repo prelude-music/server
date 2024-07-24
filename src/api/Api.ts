@@ -58,10 +58,12 @@ namespace Api {
             if (req.method !== "GET") return Controller.methodNotAllowed(req);
             switch (req.url.pathname as typeof this.paths[number]) {
                 case "/": return new JsonResponse({
-                    version: this.version,
-                    spec: {
-                        json: "/openapi.json",
-                        yaml: "/openapi.yaml"
+                    prelude: {
+                        version: this.version,
+                        spec: {
+                            json: "/openapi.json",
+                            yaml: "/openapi.yaml"
+                        }
                     }
                 });
                 case "/openapi.yaml": return new FileResponse(this.openApi);
