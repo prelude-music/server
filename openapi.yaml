@@ -115,6 +115,10 @@ paths:
                     type: integer
                     description: Total number of artists in the library
                     example: 191
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /artists
                   previous:
                     type: string
                     nullable: true
@@ -198,6 +202,10 @@ paths:
                     type: integer
                     description: Total number of albums in the library of this artist
                     example: 24
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /artists/h0+wZAY3FUjqOPmL1WODJCH1L44/albums
                   previous:
                     type: string
                     nullable: true
@@ -257,6 +265,10 @@ paths:
                     type: integer
                     description: Total number of tracks in the library of this artist
                     example: 24
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /artists/h0+wZAY3FUjqOPmL1WODJCH1L44/tracks
                   previous:
                     type: string
                     nullable: true
@@ -333,6 +345,10 @@ paths:
                     type: integer
                     description: Total number of albums in the library
                     example: 117
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /albums
                   previous:
                     type: string
                     nullable: true
@@ -417,6 +433,10 @@ paths:
                     type: integer
                     description: Total number of tracks in the album
                     example: 24
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /albums/GxLAk47P9IJnxLHcW2WKJ+a0Wv4/tracks
                   previous:
                     type: string
                     nullable: true
@@ -508,6 +528,10 @@ paths:
                     type: integer
                     description: Total number of tracks
                     example: 284
+                  href:
+                    type: string
+                    description: This request's path and query parameters
+                    example: /tracks
                   previous:
                     type: string
                     nullable: true
