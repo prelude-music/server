@@ -1,4 +1,5 @@
 openapi: 3.0.3
+
 info:
   title: Prelude API
   version: 0.0.0
@@ -6,11 +7,14 @@ info:
   license:
     name: GNU General Public License v3.0
     url: https://github.com/prelude-music/server/blob/main/LICENSE
-tags:
-  - name: Prelude
-  - name: Artists
-  - name: Albums
-  - name: Tracks
+
+tags: [
+  { name: Prelude },
+  { name: Artists },
+  { name: Albums },
+  { name: Tracks }
+]
+
 paths:
   /:
     get:
@@ -43,6 +47,7 @@ paths:
                             type: string
                             description: Path to OpenAPI specification in YAML format
                             example: openapi.yaml
+
   /openapi.yaml:
     get:
       tags: [ Prelude ]
@@ -52,6 +57,7 @@ paths:
           description: OpenAPI specification
           content:
             text/yaml: { }
+
   /openapi.json:
     get:
       tags: [ Prelude ]
@@ -62,10 +68,10 @@ paths:
           description: OpenAPI specification
           content:
             application/json: { }
+
   /artists:
     get:
-      tags:
-        - Artists
+      tags: [ Artists ]
       summary: List artists
       parameters:
         - in: query
@@ -90,7 +96,7 @@ paths:
             items:
               type: string
       responses:
-        '200':
+        200:
           description: List of artists
           content:
             application/json:
@@ -118,46 +124,46 @@ paths:
                     type: string
                     nullable: true
                     description: Path to the next page, null if this is the last page
-                    example: '/artists?limit=100&page=2'
+                    example: /artists?limit=100&page=2
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Artist'
+                      $ref: "#/components/schemas/Artist"
+
   /artists/{id}:
     get:
-      tags:
-        - Artists
+      tags: [ Artists ]
       summary: Get artist by ID
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Artist/properties/id'
+            $ref: "#/components/schemas/Artist/properties/id"
       responses:
-        '200':
+        200:
           description: An artist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Artist'
-        '404':
+                $ref: "#/components/schemas/Artist"
+        404:
           description: The requested artist could not be found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+
   /artists/{id}/albums:
     get:
-      tags:
-        - Artists
-      summary: List artist's albums
+      tags: [ Artists ]
+      summary: List artist"s albums
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Artist/properties/id'
+            $ref: "#/components/schemas/Artist/properties/id"
         - in: query
           description: Number of resources to return per page
           name: limit
@@ -173,8 +179,8 @@ paths:
             default: 1
             minimum: 1
       responses:
-        '200':
-          description: List of artist's albums
+        200:
+          description: List of artist"s albums
           content:
             application/json:
               schema:
@@ -205,18 +211,18 @@ paths:
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Album'
+                      $ref: "#/components/schemas/Album"
+
   /artists/{id}/tracks:
     get:
-      tags:
-        - Artists
-      summary: List artist's tracks
+      tags: [ Artists ]
+      summary: List artist"s tracks
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Artist/properties/id'
+            $ref: "#/components/schemas/Artist/properties/id"
         - in: query
           description: Number of resources to return per page
           name: limit
@@ -232,8 +238,8 @@ paths:
             default: 1
             minimum: 1
       responses:
-        '200':
-          description: List of artist's tracks
+        200:
+          description: List of artist"s tracks
           content:
             application/json:
               schema:
@@ -264,34 +270,33 @@ paths:
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Track'
+                      $ref: "#/components/schemas/Track"
+
   /artists/{id}/image:
     get:
-      tags:
-        - Artists
-      summary: Get artist's image
+      tags: [ Artists ]
+      summary: Get artist"s image
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Artist/properties/id'
+            $ref: "#/components/schemas/Artist/properties/id"
       responses:
-        '200':
-          description: The artist's image
+        200:
+          description: The artist"s image
           content:
             image/*: { }
-        '404':
+        404:
           description: The artist does not have an associated image
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /albums:
     get:
-      tags:
-        - Albums
+      tags: [ Albums ]
       summary: List albums
       parameters:
         - in: query
@@ -309,7 +314,7 @@ paths:
             default: 1
             minimum: 1
       responses:
-        '200':
+        200:
           description: List of albums
           content:
             application/json:
@@ -337,39 +342,39 @@ paths:
                     type: string
                     nullable: true
                     description: Path to the next page, null if this is the last page
-                    example: '/albums?limit=100&page=2'
+                    example: /albums?limit=100&page=2
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Album'
+                      $ref: "#/components/schemas/Album"
+
   /albums/{id}:
     get:
-      tags:
-        - Albums
+      tags: [ Albums ]
       summary: Get album by ID
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Album/properties/id'
+            $ref: "#/components/schemas/Album/properties/id"
       responses:
-        '200':
+        200:
           description: An album
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Album'
-        '404':
+                $ref: "#/components/schemas/Album"
+        404:
           description: The requested album could not be found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+
   /albums/{id}/tracks:
     get:
-      tags:
-        - Albums
+      tags: [ Albums ]
       summary: List tracks in album
       description: The tracks are always sorted by `Track#track.no` (if available).
       parameters:
@@ -377,7 +382,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Album/properties/id'
+            $ref: "#/components/schemas/Album/properties/id"
         - in: query
           description: Number of resources to return per page
           name: limit
@@ -393,7 +398,7 @@ paths:
             default: 1
             minimum: 1
       responses:
-        '200':
+        200:
           description: List of tracks
           content:
             application/json:
@@ -425,34 +430,33 @@ paths:
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Track'
+                      $ref: "#/components/schemas/Track"
+
   /albums/{id}/image:
     get:
-      tags:
-        - Albums
-      summary: Get album's image
+      tags: [ Albums ]
+      summary: Get album"s image
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Album/properties/id'
+            $ref: "#/components/schemas/Album/properties/id"
       responses:
-        '200':
-          description: The album's image
+        200:
+          description: The album"s image
           content:
             image/*: { }
-        '404':
+        404:
           description: The album does not have an associated image
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /tracks:
     get:
-      tags:
-        - Tracks
+      tags: [ Tracks ]
       summary: List tracks
       parameters:
         - in: query
@@ -485,7 +489,7 @@ paths:
               - duration:desc
             example: duration:desc
       responses:
-        '200':
+        200:
           description: List of tracks
           content:
             application/json:
@@ -517,45 +521,45 @@ paths:
                   resources:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Track'
+                      $ref: "#/components/schemas/Track"
+
   /tracks/{id}:
     get:
-      tags:
-        - Tracks
+      tags: [ Tracks ]
       summary: Get track
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Track/properties/id'
+            $ref: "#/components/schemas/Track/properties/id"
       responses:
-        '200':
+        200:
           description: The requested track
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Track'
-        '404':
+                $ref: "#/components/schemas/Track"
+        404:
           description: The requested track could not be found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+
   /tracks/{id}/audio:
     get:
-      tags:
-        - Tracks
-      summary: Get track's audio
+      tags: [ Tracks ]
+      summary: Get track"s audio
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Track/properties/id'
+            $ref: "#/components/schemas/Track/properties/id"
       responses:
-        '200':
-          description: The track's audio
+        200:
+          description: The track"s audio
           content:
             audio/aiff: { }
             audio/aac: { }
@@ -579,34 +583,34 @@ paths:
             audio/webm: { }
             audio/wavpack: { }
             audio/x-ms-wma: { }
-        '404':
+        404:
           description: The track does not have an associated audio
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+
   /tracks/{id}/image:
     get:
-      tags:
-        - Tracks
-      summary: Get track's image
+      tags: [ Tracks ]
+      summary: Get track"s image
       parameters:
         - in: path
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Track/properties/id'
+            $ref: "#/components/schemas/Track/properties/id"
       responses:
-        '200':
-          description: The track's image
+        200:
+          description: The track"s image
           content:
             image/*: { }
-        '404':
+        404:
           description: The track does not have an associated image
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -616,46 +620,48 @@ components:
         id:
           type: string
           title: Artist ID
-          example: "h0+wZAY3FUjqOPmL1WODJCH1L44"
+          example: h0+wZAY3FUjqOPmL1WODJCH1L44
         name:
           type: string
           title: Name of the artist
-          example: "Johann Sebastian Bach"
+          example: Johann Sebastian Bach
         image:
           type: string
           title: Artist image
           format: uri
           nullable: true
-          example: 'https://example.com/image.jpg'
+          example: https://example.com/image.jpg
+
     Album:
       type: object
       properties:
         id:
           type: string
           title: Album ID
-          example: "GxLAk47P9IJnxLHcW2WKJ+a0Wv4"
+          example: GxLAk47P9IJnxLHcW2WKJ+a0Wv4
         name:
           type: string
           title: Album name
-          example: "The Well-Tempered Clavier. Book I"
+          example: The Well-Tempered Clavier. Book I
         artist:
-          $ref: '#/components/schemas/Artist/properties/id'
+          $ref: "#/components/schemas/Artist/properties/id"
+
     Track:
       type: object
       properties:
         id:
           type: string
           title: Track ID
-          example: "lJzqGqUGjPdAI+bEOrtHeLstgTU"
+          example: lJzqGqUGjPdAI+bEOrtHeLstgTU
         title:
           type: string
           title: Track title
-          example: "Prelude and Fugue in C Minor, BWV 847"
+          example: Prelude and Fugue in C Minor, BWV 847
         artist:
-          $ref: '#/components/schemas/Artist/properties/id'
+          $ref: "#/components/schemas/Artist/properties/id"
         album:
           allOf:
-            - $ref: '#/components/schemas/Album/properties/id'
+            - $ref: "#/components/schemas/Album/properties/id"
           nullable: true
         year:
           type: integer
@@ -667,7 +673,7 @@ components:
           items:
             type: string
           title: Track genres
-          example: [ "classical" ]
+          example: [ classical ]
         track:
           type: object
           nullable: true
@@ -719,6 +725,7 @@ components:
               type: boolean
               description: Whether the audio file is in a lossless/uncompressed format
               example: false
+
     ErrorResponse:
       type: object
       properties:
@@ -727,4 +734,4 @@ components:
           properties:
             message:
               type: string
-              example: "A user-friendly error message."
+              example: A user-friendly error message.
