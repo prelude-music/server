@@ -105,28 +105,37 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Artists
-      parameters:
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
-        - in: query
-          description: Get up to 100 artists by ID. If this is used, `limit` and `page` are ignored since all results are returned in a single page
-          name: id
-          schema:
-            type: array
-            items:
-              type: string
+          }
+        },
+        {
+          in: query,
+          description: "Get up to 100 artists by ID. If this is used, `limit` and `page` are ignored since all results are returned in a single page",
+          name: id,
+          schema: {
+            type: array,
+            items: { type: string }
+          }
+        }
+      ]
       responses:
         200:
           description: A page of the artists collection
@@ -170,12 +179,14 @@ paths:
     get:
       tags: [ Artists ]
       summary: Get Artist
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Artist/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+        }
+      ]
       responses:
         200:
           description: An artist object
@@ -194,26 +205,34 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Albums of Artist
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Artist/properties/id"
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+        },
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
+          }
+        }
+      ]
       responses:
         200:
           description: A page of the artist's albums
@@ -257,26 +276,34 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Tracks of Artist
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Artist/properties/id"
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+        },
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
+          }
+        }
+      ]
       responses:
         200:
           description: A page of the artist's tracks
@@ -320,12 +347,14 @@ paths:
     get:
       tags: [ Artists ]
       summary: Get Image of Artist
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Artist/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+        }
+      ]
       responses:
         200:
           description: The actual image binary of this artist, proxied from the artist's external image URL.
@@ -348,21 +377,28 @@ paths:
     get:
       tags: [ Albums ]
       summary: List Albums
-      parameters:
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
+          }
+        }
+      ]
       responses:
         200:
           description: A page of albums
@@ -406,12 +442,14 @@ paths:
     get:
       tags: [ Albums ]
       summary: Get Album
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Album/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Album/properties/id" }
+        }
+      ]
       responses:
         200:
           description: An album object
@@ -431,26 +469,34 @@ paths:
       tags: [ Albums ]
       summary: List Tracks in Album
       description: The tracks are always sorted by `Track#track.no` (if available).
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Album/properties/id"
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Album/properties/id" }
+        },
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
+          }
+        }
+      ]
       responses:
         200:
           description: A page of tracks
@@ -495,12 +541,14 @@ paths:
       tags: [ Albums ]
       summary: Get Image of Album
       description: The image is obtained from the metadata of one of the first 5 tracks in the album.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Album/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Album/properties/id" }
+        }
+      ]
       responses:
         200:
           description: The actual image binary for this album
@@ -517,36 +565,47 @@ paths:
     get:
       tags: [ Tracks ]
       summary: List Tracks
-      parameters:
-        - in: query
-          description: Number of resources to return per page
-          name: limit
-          schema:
-            type: integer
-            default: 100
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
             minimum: 1
-        - in: query
-          description: Page number to return
-          name: page
-          schema:
-            type: integer
-            default: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
             minimum: 1
-        - in: query
-          description: Sort tracks
-          name: sort
-          schema:
-            type: string
-            enum:
-              - title:asc
-              - title:desc
-              - year:asc
-              - year:desc
-              - track_no:asc
-              - track_no:desc
-              - duration:asc
-              - duration:desc
+          }
+        },
+        {
+          in: query,
+          description: Sort tracks,
+          name: sort,
+          schema: {
+            type: string,
+            enum: [
+              "title:asc",
+              "title:desc",
+              "year:asc",
+              "year:desc",
+              "track_no:asc",
+              "track_no:desc",
+              "duration:asc",
+              "duration:desc"
+            ],
             example: duration:desc
+          }
+        }
+      ]
       responses:
         200:
           description: A page of tracks
@@ -590,12 +649,14 @@ paths:
     get:
       tags: [ Tracks ]
       summary: Get Track
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Track/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Track/properties/id" }
+        }
+      ]
       responses:
         200:
           description: A track object
@@ -614,12 +675,14 @@ paths:
     get:
       tags: [ Tracks ]
       summary: Get Audio of Track
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Track/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Track/properties/id" }
+        }
+      ]
       responses:
         200:
           description: The actual binary audio of the track
@@ -652,12 +715,14 @@ paths:
       tags: [ Tracks ]
       summary: Get Image of Track
       description: Obtained from the track metadata
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: "#/components/schemas/Track/properties/id"
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Track/properties/id" }
+        }
+      ]
       responses:
         200:
           description: The actual image binary for this track
@@ -722,8 +787,9 @@ components:
           $ref: "#/components/schemas/Artist/properties/id"
         album:
           description: This is nullable as tracks are not required to be part of an album.
-          allOf:
-            - $ref: "#/components/schemas/Album/properties/id"
+          allOf: [
+            { $ref: "#/components/schemas/Album/properties/id" }
+          ]
           nullable: true
         year:
           type: integer
