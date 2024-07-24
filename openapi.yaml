@@ -7,10 +7,61 @@ info:
     name: GNU General Public License v3.0
     url: https://github.com/prelude-music/server/blob/main/LICENSE
 tags:
+  - name: Prelude
   - name: Artists
   - name: Albums
   - name: Tracks
 paths:
+  /:
+    get:
+      tags: [ Prelude ]
+      summary: API Server Info
+      responses:
+        200:
+          description: API Server Info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prelude:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        description: The Prelude Server and API version
+                        example: 0.0.0
+                      spec:
+                        type: object
+                        description: Paths to OpenAPI specification files
+                        properties:
+                          json:
+                            type: string
+                            description: Path to OpenAPI specification in JSON format
+                            example: openapi.json
+                          yaml:
+                            type: string
+                            description: Path to OpenAPI specification in YAML format
+                            example: openapi.yaml
+  /openapi.yaml:
+    get:
+      tags: [ Prelude ]
+      summary: OpenAPI YAML specification
+      responses:
+        200:
+          description: OpenAPI specification
+          content:
+            text/yaml: { }
+  /openapi.json:
+    get:
+      tags: [ Prelude ]
+      summary: OpenAPI JSON specification
+      description: This version is a literal conversion from the YAML file.
+      responses:
+        200:
+          description: OpenAPI specification
+          content:
+            application/json: { }
   /artists:
     get:
       tags:
@@ -229,7 +280,7 @@ paths:
         '200':
           description: The artist's image
           content:
-            image/*: {}
+            image/*: { }
         '404':
           description: The artist does not have an associated image
           content:
@@ -390,7 +441,7 @@ paths:
         '200':
           description: The album's image
           content:
-            image/*: {}
+            image/*: { }
         '404':
           description: The album does not have an associated image
           content:
@@ -506,28 +557,28 @@ paths:
         '200':
           description: The track's audio
           content:
-            audio/aiff: {}
-            audio/aac: {}
-            audio/ape: {}
-            audio/asf: {}
-            audio/x-bwf: {}
-            audio/x-dff: {}
-            audio/x-dsf: {}
-            audio/flac: {}
-            audio/mpeg: {}
-            audio/x-matroska: {}
-            video/x-matroska: {}
-            audio/musepack: {}
-            audio/mp4: {}
-            audio/ogg: {}
-            audio/opus: {}
-            audio/speex: {}
-            video/ogg: {}
-            audio/vorbis: {}
-            audio/wav: {}
-            audio/webm: {}
-            audio/wavpack: {}
-            audio/x-ms-wma: {}
+            audio/aiff: { }
+            audio/aac: { }
+            audio/ape: { }
+            audio/asf: { }
+            audio/x-bwf: { }
+            audio/x-dff: { }
+            audio/x-dsf: { }
+            audio/flac: { }
+            audio/mpeg: { }
+            audio/x-matroska: { }
+            video/x-matroska: { }
+            audio/musepack: { }
+            audio/mp4: { }
+            audio/ogg: { }
+            audio/opus: { }
+            audio/speex: { }
+            video/ogg: { }
+            audio/vorbis: { }
+            audio/wav: { }
+            audio/webm: { }
+            audio/wavpack: { }
+            audio/x-ms-wma: { }
         '404':
           description: The track does not have an associated audio
           content:
@@ -549,7 +600,7 @@ paths:
         '200':
           description: The track's image
           content:
-            image/*: {}
+            image/*: { }
         '404':
           description: The track does not have an associated image
           content:
