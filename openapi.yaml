@@ -142,38 +142,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of artists in the library
-                    example: 191
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /artists
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: /artists?limit=100&page=2
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Artist"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Artist"
 
   /artists/{id}:
     get:
@@ -239,38 +215,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of albums in the library of this artist
-                    example: 24
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /artists/h0+wZAY3FUjqOPmL1WODJCH1L44/albums
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: null
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Album"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Album"
 
   /artists/{id}/tracks:
     get:
@@ -310,38 +262,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of tracks in the library of this artist
-                    example: 24
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /artists/h0+wZAY3FUjqOPmL1WODJCH1L44/tracks
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: null
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Track"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Track"
 
   /artists/{id}/image:
     get:
@@ -405,38 +333,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of albums in the library
-                    example: 117
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /albums
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: /albums?limit=100&page=2
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Album"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Album"
 
   /albums/{id}:
     get:
@@ -503,38 +407,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of tracks in the album
-                    example: 24
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /albums/GxLAk47P9IJnxLHcW2WKJ+a0Wv4/tracks
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: null
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Track"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Track"
 
   /albums/{id}/image:
     get:
@@ -612,38 +492,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    description: Current page
-                    example: 1
-                  limit:
-                    type: integer
-                    description: Number of resources per page
-                    example: 100
-                  total:
-                    type: integer
-                    description: Total number of tracks
-                    example: 284
-                  href:
-                    type: string
-                    description: This request's path and query parameters
-                    example: /tracks
-                  previous:
-                    type: string
-                    nullable: true
-                    description: Path to the previous page; null if this is the first page
-                    example: null
-                  next:
-                    type: string
-                    nullable: true
-                    description: Path to the next page, null if this is the last page
-                    example: /tracks?limit=100&page=2&sort=duration%3Adesc
-                  resources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Track"
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Track"
 
   /tracks/{id}:
     get:
@@ -853,6 +709,38 @@ components:
               type: boolean
               description: Whether the audio file is in a lossless/uncompressed format
               example: false
+
+    Page<T>:
+      description: A page is a partial list of items from a larger collection
+      type: object
+      properties:
+        page:
+          description: The current page number
+          type: integer
+          example: 1
+          minimum: 1
+        limit:
+          description: The maximum number of items per page
+          example: 100
+          minimum: 0
+        total:
+          description: The total number of items in the entire collection (not just the current page)
+          example: 91
+          minimum: 0
+        href:
+          description: The path and query parameters of the current page
+          type: string
+          example: /path?and=query
+        previous:
+          description: The path and query parameters for the previous page, unless this is the first page
+          type: string
+          nullable: true
+          example: null
+        next:
+          description: The path and query parameters for the next page, unless this is the last page
+          type: string
+          nullable: true
+          example: null
 
     ErrorResponse:
       type: object
