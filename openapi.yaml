@@ -593,14 +593,14 @@ paths:
           schema: {
             type: string,
             enum: [
-              "title:asc",
-              "title:desc",
-              "year:asc",
-              "year:desc",
-              "track_no:asc",
-              "track_no:desc",
-              "duration:asc",
-              "duration:desc"
+              title:asc,
+              title:desc,
+              year:asc,
+              year:desc,
+              track_no:asc,
+              track_no:desc,
+              duration:asc,
+              duration:desc
             ],
             example: duration:desc
           }
