@@ -1,4 +1,4 @@
-import ID_ from "../ID.js";
+import HashID from "../HashID.js";
 import Artist from "./Artist.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
@@ -31,7 +31,7 @@ class Album extends ApiResource {
 }
 
 namespace Album {
-    export class ID extends ID_ {
+    export class ID extends HashID {
         public constructor(id: string) {
             super(id);
         }

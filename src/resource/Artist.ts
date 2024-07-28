@@ -1,4 +1,4 @@
-import ID_ from "../ID.js";
+import HashID from "../HashID.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
 import ApiResource from "../api/ApiResource.js";
@@ -30,7 +30,7 @@ class Artist extends ApiResource {
 }
 
 namespace Artist {
-    export class ID extends ID_ {
+    export class ID extends HashID {
         public constructor(id: string) {
             super(id);
         }

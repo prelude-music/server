@@ -1,5 +1,5 @@
 import {parseFile as getMetadataFromFile} from "music-metadata";
-import ID_ from "../ID.js";
+import HashID from "../HashID.js";
 import File from "../File.js";
 import Artist from "./Artist.js";
 import Album from "./Album.js";
@@ -83,7 +83,7 @@ class Track extends ApiResource {
 }
 
 namespace Track {
-    export class ID extends ID_ {
+    export class ID extends HashID {
         public constructor(id: string) {
             super(id);
         }
