@@ -1,9 +1,13 @@
 import http from "node:http";
-import {parse as queryStringParse} from "querystring";
+import {parse as queryStringParse} from "node:querystring";
 import JsonResponse from "../response/JsonResponse.js";
 import EnhancedSwitch from "enhanced-switch";
 import ErrorResponse from "../response/ErrorResponse.js";
 import ApiResponse from "../response/ApiResponse.js";
+import Authorisation from "../Authorisation.js";
+import Library from "../Library.js";
+import Token from "../resource/Token.js";
+import ThrowableResponse from "../response/ThrowableResponse.js";
 
 export default class ApiRequest {
     /**
@@ -15,15 +19,28 @@ export default class ApiRequest {
         return this._handled;
     }
 
-    /**
-     * @internal
-     */
-    public _body: JsonResponse.Object | JsonResponse.Array | Buffer = {};
+    #body: JsonResponse.Object | JsonResponse.Array | Buffer = {};
+    public get body(): JsonResponse.Object | JsonResponse.Array | Buffer {
+        return this.#body;
+    }
+
+    #auth: Authorisation | null = null;
+    public get auth(): Authorisation | null {
+        return this.#auth;
+    }
+
+    public require(scope: Token.Scope) {
+        if (this.auth === null) throw new ThrowableResponse(Authorisation.UNAUTHORISED);
+        this.auth.require(scope);
+    }
 
     public readonly url: URL;
 
-    public static async create(req: http.IncomingMessage, res: http.ServerResponse): Promise<ApiRequest> {
+    public static async create(req: http.IncomingMessage, res: http.ServerResponse, library: Library): Promise<ApiRequest> {
         const request = new ApiRequest(req, res);
+
+        request.#auth = await Authorisation.fromReq(request, library);
+
         const contentType = request.req.headers["content-type"];
         if (contentType === undefined)
             return request;
@@ -32,7 +49,7 @@ export default class ApiRequest {
         if (contentLengthHeader === undefined)
             return request;
         const contentLength = Number.parseInt(contentLengthHeader, 10);
-        if (Number.isFinite(contentLength) && contentLength > 0)
+        if (!Number.isFinite(contentLength) && contentLength <= 0)
             return request;
         const data = Buffer.alloc(Number.parseInt(contentLengthHeader, 10));
         let offset = 0;
@@ -46,18 +63,18 @@ export default class ApiRequest {
         new EnhancedSwitch(contentType.toLowerCase().trim())
             .case("application/json", () => {
                 try {
-                    request._body = JSON.parse(data.toString());
+                    request.#body = JSON.parse(data.toString());
                 }
                 catch (e) {
                     const err: SyntaxError = e as SyntaxError;
-                    request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, err));
+                    request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
                 }
             })
             .case("application/x-www-form-urlencoded", () => {
-                request._body = queryStringParse(data.toString());
+                request.#body = queryStringParse(data.toString());
             })
             .default(() => {
-                request._body = Buffer.from(data);
+                request.#body = Buffer.from(data);
             });
 
         return request;

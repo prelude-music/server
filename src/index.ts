@@ -8,6 +8,8 @@ import Database from "./db/Database.js";
 import Artist from "./resource/Artist.js";
 import Album from "./resource/Album.js";
 import Track from "./resource/Track.js";
+import User from "./resource/User.js";
+import Token from "./resource/Token.js";
 
 const configArgIndex = process.argv.findIndex(arg => arg === "--config" || arg === "-c");
 const customConfig = configArgIndex >= 0 && process.argv.length > configArgIndex + 1;
@@ -41,7 +43,9 @@ const server = await new Server(config, packageJson, [
     new Artist.Controller(library),
     new Album.Controller(library),
     new Track.Controller(library),
-]).listen();
+    new User.Controller(library),
+    new Token.Controller(library),
+], library).listen();
 console.log(`Server listening on http://0.0.0.0:${config.port}`);
 
 console.log("Reloading library... (this may take a while)");

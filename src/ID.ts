@@ -4,7 +4,7 @@ export default abstract class ID {
     /**
      * Create ID from the string representation of an ID.
      */
-    protected constructor(id: string) {
+    public constructor(id: string) {
         this.#id = id;
     }
 

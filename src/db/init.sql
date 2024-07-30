@@ -36,3 +36,27 @@ CREATE TABLE IF NOT EXISTS `tracks`
 
 CREATE INDEX IF NOT EXISTS `track_artist` ON `tracks` (`artist`);
 CREATE INDEX IF NOT EXISTS `track_album` ON `tracks` (`album`);
+
+CREATE TABLE IF NOT EXISTS `users`
+(
+    `id`       CHAR(36) PRIMARY KEY NOT NULL COLLATE nocase,
+    `username` VARCHAR(24)          NOT NULL COLLATE nocase,
+    `scopes`   TEXT                 NOT NULL COLLATE nocase,
+    `password` TEXT                 NOT NULL COLLATE nocase,
+    `disabled` BOOLEAN              NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS `users_username` ON `users` (`username`);
+
+CREATE TABLE IF NOT EXISTS `tokens`
+(
+    `id`      CHAR(36) PRIMARY KEY NOT NULL COLLATE nocase,
+    `user`    CHAR(36)             NOT NULL COLLATE nocase,
+    `secret`  CHAR(36)             NOT NULL COLLATE binary,
+    `scopes`  TEXT                 NOT NULL COLLATE nocase,
+    `expires` DATETIME             NULL,
+    `note`    VARCHAR(128)         NOT NULL COLLATE nocase,
+    FOREIGN KEY (`user`) REFERENCES `users` (`id`)
+);
+
+CREATE INDEX IF NOT EXISTS `tokens_user` ON `tokens` (`user`);

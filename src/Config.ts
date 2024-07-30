@@ -32,16 +32,23 @@ export default class Config {
      */
     public readonly db: File;
 
+    /**
+     * Minimum password length for users
+     */
+    public readonly minPasswordLength: number;
+
     public constructor(options: {
         port?: typeof Config.prototype.port,
         discoverPaths?: typeof Config.prototype.discoverPaths,
         unknownArtist?: typeof Config.prototype.unknownArtist,
         db?: typeof Config.prototype.db,
+        minPasswordLength?: number,
     }) {
         this.port = options.port ?? 9847;
         this.discoverPaths = options.discoverPaths ?? [];
         this.unknownArtist = options.unknownArtist ?? "Unknown Artist";
         this.db = options.db ?? new SystemFile("/prelude.db");
+        this.minPasswordLength = options.minPasswordLength ?? 8;
     }
 
     public static async fromFile(file: File): Promise<Config> {
@@ -70,6 +77,12 @@ export default class Config {
             if (typeof json.db !== "string")
                 throw new TypeError(`Config option "db" must be a string; got (${typeof json.db}) ${json.db}`);
             options.db = new SystemFile(json.db);
+        }
+
+        if ("minPasswordLength" in json) {
+            if (typeof json.minPasswordLength !== "number")
+                throw new TypeError(`Config option "minPasswordLength" must be a number; got (${typeof json.minPasswordLength}) ${json.minPasswordLength}`);
+            options.minPasswordLength = json.minPasswordLength;
         }
 
         return new Config(options);

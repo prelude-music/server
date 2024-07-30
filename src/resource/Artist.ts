@@ -10,6 +10,7 @@ import PageResponse from "../response/PageResponse.js";
 import ErrorResponse from "../response/ErrorResponse.js";
 import Library from "../Library.js";
 import ProxyResponse from "../response/ProxyResponse.js";
+import Token from "./Token.js";
 
 class Artist extends ApiResource {
     public constructor(
@@ -95,6 +96,7 @@ namespace Artist {
         ];
 
         protected override list(req: ApiRequest): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const ids = req.url.searchParams.getAll("id");
             if (ids.length > 0) {
                 const idSet = new Set<Artist.ID>(ids.map(id => new Artist.ID(id)));
@@ -107,7 +109,8 @@ namespace Artist {
             return new PageResponse(req, artists.resources.map(a => a.json()), limit.page, limit.limit, artists.total);
         }
 
-        protected override get(_req: ApiRequest, id: string): ApiResponse {
+        protected override get(req: ApiRequest, id: string): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const artist = this.library.repositories.artists.get(new Artist.ID(id));
             if (artist === null) return Artist.Controller.notFound();
             return new JsonResponse(artist.json());
@@ -122,6 +125,7 @@ namespace Artist {
         protected override readonly path = ["artists", null, "albums"];
         protected override readonly pathStartIndex = 2;
         protected override list(req: ApiRequest, urlParts: string[]): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const artist = this.library.repositories.artists.get(new Artist.ID(urlParts[1]!));
             if (artist === null) return Artist.Controller.notFound();
             const limit = req.limit();
@@ -134,6 +138,7 @@ namespace Artist {
         protected override readonly path = ["artists", null, "tracks"];
         protected override readonly pathStartIndex = 2;
         protected override list(req: ApiRequest, urlParts: string[]): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const artist = this.library.repositories.artists.get(new Artist.ID(urlParts[1]!));
             if (artist === null) return Artist.Controller.notFound();
             const limit = req.limit();
@@ -152,7 +157,8 @@ namespace Artist {
         }
 
         public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
-            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            if (!["GET", "HEAD"].includes(req.method)) return Controller_.methodNotAllowed(req);
+            req.require(Token.Scope.LIBRARY_READ);
             const artist = this.library.repositories.artists.get(new Artist.ID(urlParts[1]!));
             if (artist === null) return Artist.Controller.notFound();
             if (artist.externalImage === null) return ImageController.notFound(artist);

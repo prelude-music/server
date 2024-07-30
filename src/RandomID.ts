@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import ID from "./ID.js";
 
 export default class RandomID extends ID {
