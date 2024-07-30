@@ -105,6 +105,9 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Artists
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: query,
@@ -155,6 +158,9 @@ paths:
     get:
       tags: [ Artists ]
       summary: Get Artist
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -181,6 +187,9 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Albums of Artist
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -228,6 +237,9 @@ paths:
     get:
       tags: [ Artists ]
       summary: List Tracks of Artist
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -275,6 +287,9 @@ paths:
     get:
       tags: [ Artists ]
       summary: Get Image of Artist
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -305,6 +320,9 @@ paths:
     get:
       tags: [ Albums ]
       summary: List Albums
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: query,
@@ -346,6 +364,9 @@ paths:
     get:
       tags: [ Albums ]
       summary: Get Album
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -373,6 +394,9 @@ paths:
       tags: [ Albums ]
       summary: List Tracks in Album
       description: The tracks are always sorted by `Track#track.no` (if available).
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -421,6 +445,9 @@ paths:
       tags: [ Albums ]
       summary: Get Image of Album
       description: The image is obtained from the metadata of one of the first 5 tracks in the album.
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -445,6 +472,9 @@ paths:
     get:
       tags: [ Tracks ]
       summary: List Tracks
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: query,
@@ -505,6 +535,9 @@ paths:
     get:
       tags: [ Tracks ]
       summary: Get Track
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -531,6 +564,9 @@ paths:
     get:
       tags: [ Tracks ]
       summary: Get Audio of Track
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -571,6 +607,9 @@ paths:
       tags: [ Tracks ]
       summary: Get Image of Track
       description: Obtained from the track metadata
+      security:
+        - basic: []
+        - bearer: [library:read]
       parameters: [
         {
           in: path,
@@ -592,6 +631,15 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 
 components:
+  securitySchemes:
+    basic:
+      type: http
+      scheme: Basic
+      description: Authenticate using username and password. All scopes granted on your user account will apply.
+    bearer:
+      type: http
+      scheme: Bearer
+      description: Authenticate using an API Token.
   schemas:
     Artist:
       type: object
