@@ -106,7 +106,7 @@ paths:
       tags: [ Artists ]
       summary: List Artists
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -159,7 +159,7 @@ paths:
       tags: [ Artists ]
       summary: Get Artist
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -188,7 +188,7 @@ paths:
       tags: [ Artists ]
       summary: List Albums of Artist
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -238,7 +238,7 @@ paths:
       tags: [ Artists ]
       summary: List Tracks of Artist
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -288,7 +288,7 @@ paths:
       tags: [ Artists ]
       summary: Get Image of Artist
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -321,7 +321,7 @@ paths:
       tags: [ Albums ]
       summary: List Albums
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -365,7 +365,7 @@ paths:
       tags: [ Albums ]
       summary: Get Album
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -395,7 +395,7 @@ paths:
       summary: List Tracks in Album
       description: The tracks are always sorted by `Track#track.no` (if available).
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -446,7 +446,7 @@ paths:
       summary: Get Image of Album
       description: The image is obtained from the metadata of one of the first 5 tracks in the album.
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -473,7 +473,7 @@ paths:
       tags: [ Tracks ]
       summary: List Tracks
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -536,7 +536,7 @@ paths:
       tags: [ Tracks ]
       summary: Get Track
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -565,7 +565,7 @@ paths:
       tags: [ Tracks ]
       summary: Get Audio of Track
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
@@ -608,7 +608,7 @@ paths:
       summary: Get Image of Track
       description: Obtained from the track metadata
       security:
-        - basic: []
+        - basic: [library:read]
         - bearer: [library:read]
       parameters: [
         {
