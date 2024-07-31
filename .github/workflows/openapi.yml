@@ -2,10 +2,10 @@ name: OpenAPI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: [/openapi.yaml]
+    paths: ["**/openapi.yaml"]
   push:
     branches: [main]
-    paths: [/openapi.yaml]
+    paths: ["**/openapi.yaml"]
 jobs:
   lint:
     name: Lint OpenAPI Specification
