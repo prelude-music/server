@@ -1,0 +1,33 @@
+name: OpenAPI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: [/openapi.yaml]
+  push:
+    branches: [main]
+    paths: [/openapi.yaml]
+jobs:
+  lint:
+    name: Lint OpenAPI Specification
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        node:
+          - 20
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "${{ matrix.node }}"
+      - uses: actions/checkout@v4
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-v${{ matrix.node }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-v${{ matrix.node }}-
+      - name: Install Dependencies
+        run: npm install
+      - name: Lint
+        run: npm run docs:lint
