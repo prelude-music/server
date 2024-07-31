@@ -8,8 +8,7 @@ import ErrorResponse from "./response/ErrorResponse.js";
 export default class Authorisation {
     public constructor(
         public readonly user: User,
-        public readonly scopes: Readonly<Set<Token.Scope>>,
-        public readonly expires: Date | null
+        public readonly scopes: Readonly<Set<Token.Scope>>
     ) {
     }
 
@@ -19,19 +18,19 @@ export default class Authorisation {
 
     public static fromToken(secret: Token.Secret, library: Library): Authorisation | null {
         const token = library.repositories.tokens.getBySecret(secret);
-        if (token === null) return null;
+        if (token === null || token.expired) return null;
         const user = library.repositories.users.get(token.user);
         if (user === null) {
             library.repositories.tokens.delete(token.id);
             return null;
         }
         if (user.disabled) return null;
-        return new Authorisation(user, Object.freeze(token.scopes), token.expires);
+        return new Authorisation(user, Object.freeze(token.scopes));
     }
 
     public static fromUser(user: User): Authorisation | null {
         if (user.disabled) return null;
-        return new Authorisation(user, Object.freeze(user.scopes), null);
+        return new Authorisation(user, Object.freeze(user.scopes));
     }
 
     public static async fromBasic(username: string, password: string, library: Library): Promise<Authorisation | null> {

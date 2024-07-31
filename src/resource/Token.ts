@@ -35,6 +35,10 @@ class Token extends ApiResource {
         this.#secret = secret;
     }
 
+    public get expired(): boolean {
+        return this.expires !== null && this.expires < new Date();
+    }
+
     public get secret(): Token.Secret {
         return this.#secret;
     }
