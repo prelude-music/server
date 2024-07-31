@@ -1255,10 +1255,11 @@ components:
           title: Name of the artist
           example: Johann Sebastian Bach
         image:
-          type: string
+          type:
+            - string
+            - "null"
           title: Artist image
           format: uri
-          nullable: true
           example: https://example.com/image.jpg
 
     Album:
@@ -1292,15 +1293,16 @@ components:
           $ref: "#/components/schemas/Artist/properties/id"
         album:
           description: This is nullable as tracks are not required to be part of an album.
-          allOf: [
-            {$ref: "#/components/schemas/Album/properties/id"}
+          oneOf: [
+            {$ref: "#/components/schemas/Album/properties/id"},
+            {type: "null"}
           ]
-          nullable: true
         year:
-          type: integer
+          type:
+            - integer
+            - "null"
           title: Track year
           example: 1722
-          nullable: true
         genres:
           type: array
           items:
@@ -1308,31 +1310,35 @@ components:
             example: classical
           title: Track genres
         track:
-          type: object
-          nullable: true
+          type:
+            - object
+            - "null"
           properties:
             no:
               type: integer
               title: Track number
               example: 2
             of:
-              type: integer
+              type:
+                - integer
+                - "null"
               title: Of total tracks (presumably in the album)
               example: 24
-              nullable: true
         disk:
-          type: object
-          nullable: true
+          type:
+            - object
+            - "null"
           properties:
             no:
               type: integer
               title: Disk number
               example: 1
             of:
-              type: integer
+              type:
+                - integer
+                - "null"
               title: Of total disks
               example: 2
-              nullable: true
         duration:
           type: integer
           title: Track duration
@@ -1394,9 +1400,10 @@ components:
           $ref: "#/components/schemas/User/properties/id"
         expires:
           description: The date in Unix time when the token expires. If null, the token does not expire. After the token expires, the server will consider it invalid.
-          type: integer
+          type:
+            - integer
+            - "null"
           format: unix-time
-          nullable: true
           example: 1893448800
         scopes:
           type: array
@@ -1435,13 +1442,15 @@ components:
           example: /path?and=query
         previous:
           description: The path and query parameters for the previous page, unless this is the first page
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           example: null
         next:
           description: The path and query parameters for the next page, unless this is the last page
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           example: null
 
     ErrorResponse:
