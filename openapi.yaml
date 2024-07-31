@@ -8,6 +8,9 @@ info:
     name: GNU General Public License v3.0
     url: https://github.com/prelude-music/server/blob/main/LICENSE
 
+servers:
+  - url: http://localhost:9847
+
 tags: [
   {
     name: Prelude,
