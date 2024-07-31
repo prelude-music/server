@@ -9,7 +9,11 @@ info:
     url: https://github.com/prelude-music/server/blob/main/LICENSE
 
 servers:
-  - url: http://localhost:9847
+  - url: "{baseUrl}"
+    variables:
+      baseUrl:
+        description: The base URL of your Prelude server
+        default: "http://localhost:9847"
 
 tags: [
   {
@@ -88,6 +92,8 @@ paths:
       tags: [Prelude]
       summary: API Server Info
       description: Basic information about the running Prelude server instance.
+      security: []
+      operationId: info
       responses:
         200:
           description: Prelude API server info
@@ -115,28 +121,38 @@ paths:
                             type: string
                             description: The OpenAPI specification from the server repository
                             examples: [openapi.yaml]
+        4XX:
+          description: "Client error"
 
   /openapi.yaml:
     get:
       tags: [Prelude]
       summary: OpenAPI YAML Specification
       description: The OpenAPI specification from the server repository
+      security: []
+      operationId: getOpenapiYaml
       responses:
         200:
           description: The raw file
           content:
             text/yaml: {}
+        4XX:
+          description: "Client error"
 
   /openapi.json:
     get:
       tags: [Prelude]
       summary: OpenAPI JSON Specification
       description: A JSON version of the OpenAPI specification. This is a literal JSON representation of YAML version.
+      security: []
+      operationId: getOpenapiJson
       responses:
         200:
           description: A parsed representation from the YAML version, serialised into JSON
           content:
             application/json: {}
+        4XX:
+          description: "Client error"
 
   /artists:
     get:
@@ -145,6 +161,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtists
       parameters: [
         {
           in: query,
@@ -183,7 +200,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -202,6 +219,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getArtist
       parameters: [
         {
           in: path,
@@ -235,6 +253,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtistAlbums
       parameters: [
         {
           in: path,
@@ -270,7 +289,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -289,6 +308,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtistTracks
       parameters: [
         {
           in: path,
@@ -324,7 +344,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -343,6 +363,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getArtistImage
       parameters: [
         {
           in: path,
@@ -380,6 +401,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listAlbums
       parameters: [
         {
           in: query,
@@ -409,7 +431,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -428,6 +450,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getAlbum
       parameters: [
         {
           in: path,
@@ -462,6 +485,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listAlbumTracks
       parameters: [
         {
           in: path,
@@ -497,7 +521,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -517,6 +541,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getAlbumImage
       parameters: [
         {
           in: path,
@@ -548,6 +573,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listTracks
       parameters: [
         {
           in: query,
@@ -596,7 +622,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -615,6 +641,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrack
       parameters: [
         {
           in: path,
@@ -648,6 +675,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrackAudio
       parameters: [
         {
           in: path,
@@ -695,6 +723,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrackImage
       parameters: [
         {
           in: path,
@@ -726,6 +755,7 @@ paths:
       security:
         - basic: [users:read]
         - bearer: [users:read]
+      operationId: listUsers
       parameters: [
         {
           in: query,
@@ -755,7 +785,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -772,6 +802,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: createUser
       requestBody:
         $ref: "#/components/requestBodies/User"
       responses:
@@ -792,6 +823,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: deleteAllUsers
       responses:
         204:
           description: All users deleted successfully
@@ -807,6 +839,7 @@ paths:
       security:
         - basic: [users:read]
         - bearer: [users:read]
+      operationId: getUser
       parameters: [
         {
           in: path,
@@ -838,6 +871,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: deleteUser
       parameters: [
         {
           in: path,
@@ -855,10 +889,11 @@ paths:
           $ref: "#/components/responses/Forbidden"
     put:
       tags: [Users]
-      summary: Update User
+      summary: Replace User
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: replaceUser
       parameters: [
         {
           in: path,
@@ -888,10 +923,11 @@ paths:
           $ref: "#/components/responses/Forbidden"
     patch:
       tags: [Users]
-      summary: Partially Update User
+      summary: Update User
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: updateUser
       parameters: [
         {
           in: path,
@@ -925,6 +961,7 @@ paths:
         - bearer: [tokens:read:self]
         - basic: [tokens:read:all]
         - bearer: [tokens:read:all]
+      operationId: listTokens
       parameters: [
         {
           in: query,
@@ -973,7 +1010,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -992,6 +1029,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: createToken
       requestBody:
         content:
           application/json:
@@ -1050,6 +1088,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: deleteAllTokens
       responses:
         204:
           description: All tokens deleted successfully
@@ -1067,6 +1106,7 @@ paths:
         - bearer: [tokens:read:self]
         - basic: [tokens:read:all]
         - bearer: [tokens:read:all]
+      operationId: getToken
       parameters: [
         {
           in: path,
@@ -1100,6 +1140,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: deleteToken
       parameters: [
         {
           in: path,
@@ -1123,12 +1164,13 @@ paths:
           $ref: "#/components/responses/Forbidden"
     put:
       tags: [Tokens]
-      summary: Update Token
+      summary: Replace Token
       security:
         - basic: [tokens:write:self]
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: replaceToken
       parameters: [
         {
           in: path,
@@ -1172,12 +1214,13 @@ paths:
           $ref: "#/components/responses/Forbidden"
     patch:
       tags: [Tokens]
-      summary: Partially Update Token
+      summary: Update Token
       security:
         - basic: [tokens:write:self]
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: updateToken
       parameters: [
         {
           in: path,
@@ -1424,7 +1467,7 @@ components:
       type: string
       enum: [library:read, library:write, tokens:read:self, tokens:write:self, tokens:read:all, tokens:write:all, users:read, users:write]
 
-    Page<T>:
+    Page:
       description: A page is a partial list of items from a larger collection
       type: object
       properties:
