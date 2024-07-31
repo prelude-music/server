@@ -322,7 +322,7 @@ namespace Token {
             this.validateScopes(req.auth, scopes);
             const token = new Token(Token.ID.random(), user.id, Token.Secret.random(), expires, scopes, note);
             this.library.repositories.tokens.save(token);
-            return new JsonResponse(token.unsafeJson());
+            return new JsonResponse(token.unsafeJson(), 201);
         }
 
         protected override deleteAll(req: ApiRequest): ApiResponse {
