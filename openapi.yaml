@@ -82,7 +82,7 @@ tags: [
 paths:
   /:
     get:
-      tags: [ Prelude ]
+      tags: [Prelude]
       summary: API Server Info
       description: Basic information about the running Prelude server instance.
       responses:
@@ -115,29 +115,29 @@ paths:
 
   /openapi.yaml:
     get:
-      tags: [ Prelude ]
+      tags: [Prelude]
       summary: OpenAPI YAML Specification
       description: The OpenAPI specification from the server repository
       responses:
         200:
           description: The raw file
           content:
-            text/yaml: { }
+            text/yaml: {}
 
   /openapi.json:
     get:
-      tags: [ Prelude ]
+      tags: [Prelude]
       summary: OpenAPI JSON Specification
       description: A JSON version of the OpenAPI specification. This is a literal JSON representation of YAML version.
       responses:
         200:
           description: A parsed representation from the YAML version, serialised into JSON
           content:
-            application/json: { }
+            application/json: {}
 
   /artists:
     get:
-      tags: [ Artists ]
+      tags: [Artists]
       summary: List Artists
       security:
         - basic: [library:read]
@@ -169,7 +169,7 @@ paths:
           name: id,
           schema: {
             type: array,
-            items: { type: string }
+            items: {type: string}
           }
         }
       ]
@@ -194,7 +194,7 @@ paths:
 
   /artists/{id}:
     get:
-      tags: [ Artists ]
+      tags: [Artists]
       summary: Get Artist
       security:
         - basic: [library:read]
@@ -204,7 +204,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+          schema: {$ref: "#/components/schemas/Artist/properties/id"}
         }
       ]
       responses:
@@ -227,7 +227,7 @@ paths:
 
   /artists/{id}/albums:
     get:
-      tags: [ Artists ]
+      tags: [Artists]
       summary: List Albums of Artist
       security:
         - basic: [library:read]
@@ -237,7 +237,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+          schema: {$ref: "#/components/schemas/Artist/properties/id"}
         },
         {
           in: query,
@@ -281,7 +281,7 @@ paths:
 
   /artists/{id}/tracks:
     get:
-      tags: [ Artists ]
+      tags: [Artists]
       summary: List Tracks of Artist
       security:
         - basic: [library:read]
@@ -291,7 +291,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+          schema: {$ref: "#/components/schemas/Artist/properties/id"}
         },
         {
           in: query,
@@ -335,7 +335,7 @@ paths:
 
   /artists/{id}/image:
     get:
-      tags: [ Artists ]
+      tags: [Artists]
       summary: Get Image of Artist
       security:
         - basic: [library:read]
@@ -345,14 +345,14 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Artist/properties/id" }
+          schema: {$ref: "#/components/schemas/Artist/properties/id"}
         }
       ]
       responses:
         200:
           description: The actual image binary of this artist, proxied from the artist's external image URL.
           content:
-            image/*: { }
+            image/*: {}
         404:
           description: The artist does not have an associated image
           content:
@@ -372,7 +372,7 @@ paths:
 
   /albums:
     get:
-      tags: [ Albums ]
+      tags: [Albums]
       summary: List Albums
       security:
         - basic: [library:read]
@@ -420,7 +420,7 @@ paths:
 
   /albums/{id}:
     get:
-      tags: [ Albums ]
+      tags: [Albums]
       summary: Get Album
       security:
         - basic: [library:read]
@@ -430,7 +430,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Album/properties/id" }
+          schema: {$ref: "#/components/schemas/Album/properties/id"}
         }
       ]
       responses:
@@ -453,7 +453,7 @@ paths:
 
   /albums/{id}/tracks:
     get:
-      tags: [ Albums ]
+      tags: [Albums]
       summary: List Tracks in Album
       description: The tracks are always sorted by `Track#track.no` (if available).
       security:
@@ -464,7 +464,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Album/properties/id" }
+          schema: {$ref: "#/components/schemas/Album/properties/id"}
         },
         {
           in: query,
@@ -508,7 +508,7 @@ paths:
 
   /albums/{id}/image:
     get:
-      tags: [ Albums ]
+      tags: [Albums]
       summary: Get Image of Album
       description: The image is obtained from the metadata of one of the first 5 tracks in the album.
       security:
@@ -519,14 +519,14 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Album/properties/id" }
+          schema: {$ref: "#/components/schemas/Album/properties/id"}
         }
       ]
       responses:
         200:
           description: The actual image binary for this album
           content:
-            image/*: { }
+            image/*: {}
         404:
           description: The album does not have an associated image
           content:
@@ -540,7 +540,7 @@ paths:
 
   /tracks:
     get:
-      tags: [ Tracks ]
+      tags: [Tracks]
       summary: List Tracks
       security:
         - basic: [library:read]
@@ -607,7 +607,7 @@ paths:
 
   /tracks/{id}:
     get:
-      tags: [ Tracks ]
+      tags: [Tracks]
       summary: Get Track
       security:
         - basic: [library:read]
@@ -617,7 +617,7 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Track/properties/id" }
+          schema: {$ref: "#/components/schemas/Track/properties/id"}
         }
       ]
       responses:
@@ -640,7 +640,7 @@ paths:
 
   /tracks/{id}/audio:
     get:
-      tags: [ Tracks ]
+      tags: [Tracks]
       summary: Get Audio of Track
       security:
         - basic: [library:read]
@@ -650,35 +650,35 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Track/properties/id" }
+          schema: {$ref: "#/components/schemas/Track/properties/id"}
         }
       ]
       responses:
         200:
           description: The actual binary audio of the track
           content:
-            audio/aiff: { }
-            audio/aac: { }
-            audio/ape: { }
-            audio/asf: { }
-            audio/x-bwf: { }
-            audio/x-dff: { }
-            audio/x-dsf: { }
-            audio/flac: { }
-            audio/mpeg: { }
-            audio/x-matroska: { }
-            video/x-matroska: { }
-            audio/musepack: { }
-            audio/mp4: { }
-            audio/ogg: { }
-            audio/opus: { }
-            audio/speex: { }
-            video/ogg: { }
-            audio/vorbis: { }
-            audio/wav: { }
-            audio/webm: { }
-            audio/wavpack: { }
-            audio/x-ms-wma: { }
+            audio/aiff: {}
+            audio/aac: {}
+            audio/ape: {}
+            audio/asf: {}
+            audio/x-bwf: {}
+            audio/x-dff: {}
+            audio/x-dsf: {}
+            audio/flac: {}
+            audio/mpeg: {}
+            audio/x-matroska: {}
+            video/x-matroska: {}
+            audio/musepack: {}
+            audio/mp4: {}
+            audio/ogg: {}
+            audio/opus: {}
+            audio/speex: {}
+            video/ogg: {}
+            audio/vorbis: {}
+            audio/wav: {}
+            audio/webm: {}
+            audio/wavpack: {}
+            audio/x-ms-wma: {}
         401:
           $ref: "#/components/responses/Unauthorised"
         403:
@@ -686,7 +686,7 @@ paths:
 
   /tracks/{id}/image:
     get:
-      tags: [ Tracks ]
+      tags: [Tracks]
       summary: Get Image of Track
       description: Obtained from the track metadata
       security:
@@ -697,14 +697,14 @@ paths:
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Track/properties/id" }
+          schema: {$ref: "#/components/schemas/Track/properties/id"}
         }
       ]
       responses:
         200:
           description: The actual image binary for this track
           content:
-            image/*: { }
+            image/*: {}
         404:
           description: The track does not have an associated image
           content:
@@ -718,11 +718,11 @@ paths:
 
   /users:
     get:
-      tags: [ Users ]
+      tags: [Users]
       summary: List Users
       security:
-        - basic: [ users:read ]
-        - bearer: [ users:read ]
+        - basic: [users:read]
+        - bearer: [users:read]
       parameters: [
         {
           in: query,
@@ -764,11 +764,11 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     post:
-      tags: [ Users ]
+      tags: [Users]
       summary: Create User
       security:
-        - basic: [ users:write ]
-        - bearer: [ users:write ]
+        - basic: [users:write]
+        - bearer: [users:write]
       requestBody:
         $ref: "#/components/requestBodies/User"
       responses:
@@ -783,12 +783,12 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     delete:
-      tags: [ Users ]
+      tags: [Users]
       summary: Delete All Users
       description: Will delete all users and all tokens.
       security:
-        - basic: [ users:write ]
-        - bearer: [ users:write ]
+        - basic: [users:write]
+        - bearer: [users:write]
       responses:
         204:
           description: All users deleted successfully
@@ -799,17 +799,17 @@ paths:
 
   /users/{id}:
     get:
-      tags: [ Users ]
+      tags: [Users]
       summary: Get User
       security:
-        - basic: [ users:read ]
-        - bearer: [ users:read ]
+        - basic: [users:read]
+        - bearer: [users:read]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/User/properties/id" }
+          schema: {$ref: "#/components/schemas/User/properties/id"}
         }
       ]
       responses:
@@ -830,17 +830,17 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     delete:
-      tags: [ Users ]
+      tags: [Users]
       summary: Delete User
       security:
-        - basic: [ users:write ]
-        - bearer: [ users:write ]
+        - basic: [users:write]
+        - bearer: [users:write]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/User/properties/id" }
+          schema: {$ref: "#/components/schemas/User/properties/id"}
         }
       ]
       responses:
@@ -851,17 +851,17 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     put:
-      tags: [ Users ]
+      tags: [Users]
       summary: Update User
       security:
-        - basic: [ users:write ]
-        - bearer: [ users:write ]
+        - basic: [users:write]
+        - bearer: [users:write]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/User/properties/id" }
+          schema: {$ref: "#/components/schemas/User/properties/id"}
         }
       ]
       requestBody:
@@ -884,17 +884,17 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     patch:
-      tags: [ Users ]
+      tags: [Users]
       summary: Partially Update User
       security:
-        - basic: [ users:write ]
-        - bearer: [ users:write ]
+        - basic: [users:write]
+        - bearer: [users:write]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/User/properties/id" }
+          schema: {$ref: "#/components/schemas/User/properties/id"}
         }
       ]
       requestBody:
@@ -915,13 +915,13 @@ paths:
 
   /tokens:
     get:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: List Tokens
       security:
-        - basic: [ tokens:read:self ]
-        - bearer: [ tokens:read:self ]
-        - basic: [ tokens:read:all ]
-        - bearer: [ tokens:read:all ]
+        - basic: [tokens:read:self]
+        - bearer: [tokens:read:self]
+        - basic: [tokens:read:all]
+        - bearer: [tokens:read:all]
       parameters: [
         {
           in: query,
@@ -977,19 +977,19 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     post:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Create Token
       security:
-        - basic: [ tokens:write:self ]
-        - bearer: [ tokens:write:self ]
-        - basic: [ tokens:write:all ]
-        - bearer: [ tokens:write:all ]
+        - basic: [tokens:write:self]
+        - bearer: [tokens:write:self]
+        - basic: [tokens:write:all]
+        - bearer: [tokens:write:all]
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              required: [ user, expires, scopes, note ]
+              required: [user, expires, scopes, note]
               properties:
                 user:
                   description: The ID of the user to create this token for. You can only use this if you have the `tokens:write:all` scope.
@@ -1004,7 +1004,7 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [ user, expires, scopes, note ]
+              required: [user, expires, scopes, note]
               properties:
                 user:
                   description: The ID of the user to create this token for. You can only use this if you have the `tokens:write:all` scope.
@@ -1035,13 +1035,13 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     delete:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Delete All Tokens
       security:
-        - basic: [ tokens:write:self ]
-        - bearer: [ tokens:write:self ]
-        - basic: [ tokens:write:all ]
-        - bearer: [ tokens:write:all ]
+        - basic: [tokens:write:self]
+        - bearer: [tokens:write:self]
+        - basic: [tokens:write:all]
+        - bearer: [tokens:write:all]
       responses:
         204:
           description: All tokens deleted successfully
@@ -1052,19 +1052,19 @@ paths:
 
   /tokens/{id}:
     get:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Get Token
       security:
-        - basic: [ tokens:read:self ]
-        - bearer: [ tokens:read:self ]
-        - basic: [ tokens:read:all ]
-        - bearer: [ tokens:read:all ]
+        - basic: [tokens:read:self]
+        - bearer: [tokens:read:self]
+        - basic: [tokens:read:all]
+        - bearer: [tokens:read:all]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Token/properties/id" }
+          schema: {$ref: "#/components/schemas/Token/properties/id"}
         }
       ]
       responses:
@@ -1085,19 +1085,19 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     delete:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Delete Token
       security:
-        - basic: [ tokens:write:self ]
-        - bearer: [ tokens:write:self ]
-        - basic: [ tokens:write:all ]
-        - bearer: [ tokens:write:all ]
+        - basic: [tokens:write:self]
+        - bearer: [tokens:write:self]
+        - basic: [tokens:write:all]
+        - bearer: [tokens:write:all]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Token/properties/id" }
+          schema: {$ref: "#/components/schemas/Token/properties/id"}
         }
       ]
       responses:
@@ -1114,19 +1114,19 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     put:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Update Token
       security:
-        - basic: [ tokens:write:self ]
-        - bearer: [ tokens:write:self ]
-        - basic: [ tokens:write:all ]
-        - bearer: [ tokens:write:all ]
+        - basic: [tokens:write:self]
+        - bearer: [tokens:write:self]
+        - basic: [tokens:write:all]
+        - bearer: [tokens:write:all]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Token/properties/id" }
+          schema: {$ref: "#/components/schemas/Token/properties/id"}
         }
       ]
       requestBody:
@@ -1134,14 +1134,14 @@ paths:
           application/json:
             schema:
               type: object
-              required: [ note ]
+              required: [note]
               properties:
                 note:
                   $ref: "#/components/schemas/Token/properties/note"
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [ note ]
+              required: [note]
               properties:
                 note:
                   $ref: "#/components/schemas/Token/properties/note"
@@ -1163,19 +1163,19 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
     patch:
-      tags: [ Tokens ]
+      tags: [Tokens]
       summary: Partially Update Token
       security:
-        - basic: [ tokens:write:self ]
-        - bearer: [ tokens:write:self ]
-        - basic: [ tokens:write:all ]
-        - bearer: [ tokens:write:all ]
+        - basic: [tokens:write:self]
+        - bearer: [tokens:write:self]
+        - basic: [tokens:write:all]
+        - bearer: [tokens:write:all]
       parameters: [
         {
           in: path,
           name: id,
           required: true,
-          schema: { $ref: "#/components/schemas/Token/properties/id" }
+          schema: {$ref: "#/components/schemas/Token/properties/id"}
         }
       ]
       requestBody:
@@ -1290,7 +1290,7 @@ components:
         album:
           description: This is nullable as tracks are not required to be part of an album.
           allOf: [
-            { $ref: "#/components/schemas/Album/properties/id" }
+            {$ref: "#/components/schemas/Album/properties/id"}
           ]
           nullable: true
         year:
@@ -1407,7 +1407,7 @@ components:
     Scope:
       description: Controls access to API resources
       type: string
-      enum: [ library:read, library:write, tokens:read:self, tokens:write:self, tokens:read:all, tokens:write:all, users:read, users:write ]
+      enum: [library:read, library:write, tokens:read:self, tokens:write:self, tokens:read:all, tokens:write:all, users:read, users:write]
 
     Page<T>:
       description: A page is a partial list of items from a larger collection
@@ -1459,11 +1459,11 @@ components:
     BooleanLike:
       oneOf:
         - type: boolean
-          enum: [ true, false ]
+          enum: [true, false]
         - type: string
-          enum: [ "true", "false", "1", "0", "on" ]
+          enum: ["true", "false", "1", "0", "on"]
         - type: integer
-          enum: [ 1, 0 ]
+          enum: [1, 0]
       example: false
 
     UserWrite:
@@ -1487,10 +1487,10 @@ components:
           schema:
             allOf:
               - $ref: "#/components/schemas/UserWrite"
-            required: [ username, password, scopes, disabled ]
+            required: [username, password, scopes, disabled]
         application/x-www-form-urlencoded:
           schema:
             allOf:
               - $ref: "#/components/schemas/UserWrite"
-            required: [ username, password, scopes, disabled ]
+            required: [username, password, scopes, disabled]
 
