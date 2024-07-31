@@ -153,6 +153,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Artist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /artists/{id}:
     get:
@@ -182,6 +186,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /artists/{id}/albums:
     get:
@@ -232,6 +240,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Album"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /artists/{id}/tracks:
     get:
@@ -282,6 +294,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Track"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /artists/{id}/image:
     get:
@@ -315,6 +331,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /albums:
     get:
@@ -359,6 +379,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Album"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /albums/{id}:
     get:
@@ -388,6 +412,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /albums/{id}/tracks:
     get:
@@ -439,6 +467,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Track"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /albums/{id}/image:
     get:
@@ -467,6 +499,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /tracks:
     get:
@@ -530,6 +566,10 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Track"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /tracks/{id}:
     get:
@@ -559,6 +599,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /tracks/{id}/audio:
     get:
@@ -601,6 +645,10 @@ paths:
             audio/webm: { }
             audio/wavpack: { }
             audio/x-ms-wma: { }
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
   /tracks/{id}/image:
     get:
@@ -629,6 +677,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
 
 components:
   securitySchemes:
