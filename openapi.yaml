@@ -42,7 +42,41 @@ tags: [
       The track ID is a hash of the artist's name, the album's name (or whether present), and the track name itself.
       Changing any of these will result in a new ID. Track IDs will be identical across Prelude server instances of the
       same version."
+  },
+  {
+    name: Users,
+    description: "Users are accounts secured by a password that can be used to access the Prelude server."
+  },
+  {
+    name: Tokens,
+    description: "Tokens enable authentication with the Prelude server. Using the token scopes,
+      you can control what endpoints the API token can be used for.
+      
+      
+      The available token scopes are:
+      
+      | Scope             | Description                                                                                              | Recommended For |
+      
+      |-------------------|----------------------------------------------------------------------------------------------------------|-----------------|
+      
+      | `library:read`    | Read-only access to Artists, Albums, and Tracks.                                                        | everyone        |
+      
+      | `library:write`   | Write/modify access to Artists, Albums, and Tracks. Allows the user to upload/delete audio files.        | admin           |
+      
+      | `tokens:read:self`| Read-only access to your Tokens.                                                                        | everyone        |
+      
+      | `tokens:write:self`| Write/modify access to your Tokens.                                                                      | everyone        |
+      
+      | `tokens:read:all` | Read-only access to everyone's Tokens.                                                                  | admin           |
+      
+      | `tokens:write:all`| Write/modify access to everyone's Tokens.                                                                | admin           |
+      
+      | `users:read`      | Read-only access to Users.                                                                              | admin           |
+      
+      | `users:write`     | Write/modify access to Users.                                                                           | admin           |
+      "
   }
+
 ]
 
 paths:
@@ -682,16 +716,528 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
 
+  /users:
+    get:
+      tags: [ Users ]
+      summary: List Users
+      security:
+        - basic: [ users:read ]
+        - bearer: [ users:read ]
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
+            minimum: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
+            minimum: 1
+          }
+        }
+      ]
+      responses:
+        200:
+          description: A page of users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [ Users ]
+      summary: Create User
+      security:
+        - basic: [ users:write ]
+        - bearer: [ users:write ]
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+      responses:
+        200:
+          description: The created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [ Users ]
+      summary: Delete All Users
+      description: Will delete all users and all tokens.
+      security:
+        - basic: [ users:write ]
+        - bearer: [ users:write ]
+      responses:
+        204:
+          description: All users deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+
+  /users/{id}:
+    get:
+      tags: [ Users ]
+      summary: Get User
+      security:
+        - basic: [ users:read ]
+        - bearer: [ users:read ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/User/properties/id" }
+        }
+      ]
+      responses:
+        200:
+          description: The requested user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: The requested user could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [ Users ]
+      summary: Delete User
+      security:
+        - basic: [ users:write ]
+        - bearer: [ users:write ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/User/properties/id" }
+        }
+      ]
+      responses:
+        204:
+          description: The requested user was deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    put:
+      tags: [ Users ]
+      summary: Update User
+      security:
+        - basic: [ users:write ]
+        - bearer: [ users:write ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/User/properties/id" }
+        }
+      ]
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+      responses:
+        200:
+          description: The updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: The requested user could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      tags: [ Users ]
+      summary: Partially Update User
+      security:
+        - basic: [ users:write ]
+        - bearer: [ users:write ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/User/properties/id" }
+        }
+      ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWrite"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserWrite"
+      responses:
+        200:
+          description: The updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /tokens:
+    get:
+      tags: [ Tokens ]
+      summary: List Tokens
+      security:
+        - basic: [ tokens:read:self ]
+        - bearer: [ tokens:read:self ]
+        - basic: [ tokens:read:all ]
+        - bearer: [ tokens:read:all ]
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
+            minimum: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
+            minimum: 1
+          }
+        },
+        {
+          in: query,
+          description: Get tokens for a specific user. Incompatible with the `note` parameter.,
+          name: user,
+          schema: {
+            $ref: "#/components/schemas/User/properties/id"
+          }
+        },
+        {
+          in: query,
+          description: "Get ALL tokens. By default, only the tokens of the authenticated user are returned.
+            Incompatible with the `user` parameter.",
+          name: all
+        }
+      ]
+      responses:
+        200:
+          description: A page of tokens
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page<T>"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Token"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [ Tokens ]
+      summary: Create Token
+      security:
+        - basic: [ tokens:write:self ]
+        - bearer: [ tokens:write:self ]
+        - basic: [ tokens:write:all ]
+        - bearer: [ tokens:write:all ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ user, expires, scopes, note ]
+              properties:
+                user:
+                  description: The ID of the user to create this token for. You can only use this if you have the `tokens:write:all` scope.
+                  allOf:
+                    - $ref: "#/components/schemas/User/properties/id"
+                expires:
+                  $ref: "#/components/schemas/Token/properties/expires"
+                scopes:
+                  $ref: "#/components/schemas/Token/properties/scopes"
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [ user, expires, scopes, note ]
+              properties:
+                user:
+                  description: The ID of the user to create this token for. You can only use this if you have the `tokens:write:all` scope.
+                  allOf:
+                    - $ref: "#/components/schemas/User/properties/id"
+                expires:
+                  $ref: "#/components/schemas/Token/properties/expires"
+                scopes:
+                  $ref: "#/components/schemas/Token/properties/scopes"
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+      responses:
+        201:
+          description: The created token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Token"
+                  - type: object
+                    properties:
+                      secret:
+                        type: string
+                        description: The token secret key used for authenticating requests. This is never available again.
+                        example: ED80gmnuZumZ5N2kA0exhN2FVjpdBdk2jVze
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [ Tokens ]
+      summary: Delete All Tokens
+      security:
+        - basic: [ tokens:write:self ]
+        - bearer: [ tokens:write:self ]
+        - basic: [ tokens:write:all ]
+        - bearer: [ tokens:write:all ]
+      responses:
+        204:
+          description: All tokens deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+
+  /tokens/{id}:
+    get:
+      tags: [ Tokens ]
+      summary: Get Token
+      security:
+        - basic: [ tokens:read:self ]
+        - bearer: [ tokens:read:self ]
+        - basic: [ tokens:read:all ]
+        - bearer: [ tokens:read:all ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Token/properties/id" }
+        }
+      ]
+      responses:
+        200:
+          description: The token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        404:
+          description: The requested token could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [ Tokens ]
+      summary: Delete Token
+      security:
+        - basic: [ tokens:write:self ]
+        - bearer: [ tokens:write:self ]
+        - basic: [ tokens:write:all ]
+        - bearer: [ tokens:write:all ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Token/properties/id" }
+        }
+      ]
+      responses:
+        204:
+          description: The requested token was deleted successfully
+        404:
+          description: The requested token could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    put:
+      tags: [ Tokens ]
+      summary: Update Token
+      security:
+        - basic: [ tokens:write:self ]
+        - bearer: [ tokens:write:self ]
+        - basic: [ tokens:write:all ]
+        - bearer: [ tokens:write:all ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Token/properties/id" }
+        }
+      ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ note ]
+              properties:
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [ note ]
+              properties:
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+      responses:
+        200:
+          description: The updated token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        404:
+          description: The requested token could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      tags: [ Tokens ]
+      summary: Partially Update Token
+      security:
+        - basic: [ tokens:write:self ]
+        - bearer: [ tokens:write:self ]
+        - basic: [ tokens:write:all ]
+        - bearer: [ tokens:write:all ]
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: { $ref: "#/components/schemas/Token/properties/id" }
+        }
+      ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                note:
+                  $ref: "#/components/schemas/Token/properties/note"
+      responses:
+        200:
+          description: The updated token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        404:
+          description: The requested token could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+
 components:
   securitySchemes:
     basic:
       type: http
       scheme: Basic
-      description: Authenticate using username and password. All scopes granted on your user account will apply.
+      description: Authenticate using username and password. All scopes granted on your user account will apply. Please use HTTPS.
     bearer:
       type: http
       scheme: Bearer
       description: Authenticate using an API Token.
+  responses:
+    Unauthorised:
+      description: |-
+        Authorisation is missing or invalid. Possible causes for authorisation to be invalid are
+          - the username or password is incorrect
+          - the token secret is incorrect
+          - the token secret is correct, but the token has expired
+          - the username and password, or the token secret, are/is correct, but the user is disabled
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The scopes of the user or token used to authenticate this request lacked the required scope for this endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     Artist:
       type: object
@@ -810,6 +1356,59 @@ components:
               description: Whether the audio file is in a lossless/uncompressed format
               example: false
 
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          title: User ID
+          example: d7e33c2c-0454-4da5-b079-d46e7b47cf22
+        username:
+          type: string
+          title: Unique username. Used for Basic auth with username and password
+          example: user123
+          minLength: 3
+          maxLength: 24
+          pattern: ^[a-zA-Z0-9-._]+$
+        scopes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scope"
+          title: User scopes
+        disabled:
+          type: boolean
+          title: If true, the user cannot authenticate any API requests (even with tokens).
+          example: false
+
+    Token:
+      type: object
+      properties:
+        id:
+          type: string
+          title: Token ID
+          example: 7e10e4ff-be3f-46d0-9865-941c3d6b62c8
+        user:
+          $ref: "#/components/schemas/User/properties/id"
+        expires:
+          description: The date in Unix time when the token expires. If null, the token does not expire. After the token expires, the server will consider it invalid.
+          type: integer
+          format: unix-time
+          nullable: true
+          example: 1893448800
+        scopes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scope"
+          title: Token scopes
+        note:
+          type: string
+          description: A user-specified note for the token (e.g. description of what this token is for).
+
+    Scope:
+      description: Controls access to API resources
+      type: string
+      enum: [ library:read, library:write, tokens:read:self, tokens:write:self, tokens:read:all, tokens:write:all, users:read, users:write ]
+
     Page<T>:
       description: A page is a partial list of items from a larger collection
       type: object
@@ -851,3 +1450,47 @@ components:
             message:
               type: string
               example: A user-friendly error message.
+            fields:
+              type: object
+              additionalProperties:
+                type: string
+                example: Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.
+
+    BooleanLike:
+      oneOf:
+        - type: boolean
+          enum: [ true, false ]
+        - type: string
+          enum: [ "true", "false", "1", "0", "on" ]
+        - type: integer
+          enum: [ 1, 0 ]
+      example: false
+
+    UserWrite:
+      type: object
+      properties:
+        username:
+          $ref: "#/components/schemas/User/properties/username"
+        password:
+          type: string
+          description: Plain-text password. Please use HTTPS.
+          example: "VerySecure123!"
+        scopes:
+          $ref: "#/components/schemas/User/properties/scopes"
+        disabled:
+          $ref: "#/components/schemas/BooleanLike"
+
+  requestBodies:
+    User:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/UserWrite"
+            required: [ username, password, scopes, disabled ]
+        application/x-www-form-urlencoded:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/UserWrite"
+            required: [ username, password, scopes, disabled ]
+
