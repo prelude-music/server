@@ -102,7 +102,7 @@ paths:
                       version:
                         type: string
                         description: The version of the Prelude server and the API. Follows semantic versioning and can be used to determine compatibility between a client and the server.
-                        example: 0.0.0
+                        examples: [0.0.0]
                       spec:
                         type: object
                         description: OpenAPI specification file paths
@@ -110,11 +110,11 @@ paths:
                           json:
                             type: string
                             description: Parsed from the server's YAML OpenAPI specification and literally converted to JSON
-                            example: openapi.json
+                            examples: [openapi.json]
                           yaml:
                             type: string
                             description: The OpenAPI specification from the server repository
-                            example: openapi.yaml
+                            examples: [openapi.yaml]
 
   /openapi.yaml:
     get:
@@ -585,7 +585,7 @@ paths:
               duration:asc,
               duration:desc
             ],
-            example: duration:desc
+            examples: [duration:desc]
           }
         }
       ]
@@ -1032,7 +1032,7 @@ paths:
                       secret:
                         type: string
                         description: The token secret key used for authenticating requests. This is never available again.
-                        example: ED80gmnuZumZ5N2kA0exhN2FVjpdBdk2jVze
+                        examples: [ED80gmnuZumZ5N2kA0exhN2FVjpdBdk2jVze]
         401:
           $ref: "#/components/responses/Unauthorised"
         403:
@@ -1249,18 +1249,18 @@ components:
         id:
           type: string
           title: Artist ID
-          example: h0+wZAY3FUjqOPmL1WODJCH1L44
+          examples: [h0+wZAY3FUjqOPmL1WODJCH1L44]
         name:
           type: string
           title: Name of the artist
-          example: Johann Sebastian Bach
+          examples: [Johann Sebastian Bach]
         image:
           type:
             - string
             - "null"
           title: Artist image
           format: uri
-          example: https://example.com/image.jpg
+          examples: [https://example.com/image.jpg]
 
     Album:
       type: object
@@ -1269,11 +1269,11 @@ components:
         id:
           type: string
           title: Album ID
-          example: GxLAk47P9IJnxLHcW2WKJ+a0Wv4
+          examples: [GxLAk47P9IJnxLHcW2WKJ+a0Wv4]
         name:
           type: string
           title: Album name
-          example: The Well-Tempered Clavier. Book I
+          examples: [The Well-Tempered Clavier. Book I]
         artist:
           $ref: "#/components/schemas/Artist/properties/id"
 
@@ -1283,12 +1283,12 @@ components:
         id:
           type: string
           title: Track ID
-          example: lJzqGqUGjPdAI+bEOrtHeLstgTU
+          examples: [lJzqGqUGjPdAI+bEOrtHeLstgTU]
         title:
           type: string
           title: Track title
           description: If a title is not specified in the metadata, this will default to the base name of the file, including the extension.
-          example: Prelude and Fugue in C Minor, BWV 847
+          examples: [Prelude and Fugue in C Minor, BWV 847]
         artist:
           $ref: "#/components/schemas/Artist/properties/id"
         album:
@@ -1302,12 +1302,12 @@ components:
             - integer
             - "null"
           title: Track year
-          example: 1722
+          examples: [1722]
         genres:
           type: array
           items:
             type: string
-            example: classical
+            examples: [classical]
           title: Track genres
         track:
           type:
@@ -1317,13 +1317,13 @@ components:
             no:
               type: integer
               title: Track number
-              example: 2
+              examples: [2]
             of:
               type:
                 - integer
                 - "null"
               title: Of total tracks (presumably in the album)
-              example: 24
+              examples: [24]
         disk:
           type:
             - object
@@ -1332,18 +1332,18 @@ components:
             no:
               type: integer
               title: Disk number
-              example: 1
+              examples: [1]
             of:
               type:
                 - integer
                 - "null"
               title: Of total disks
-              example: 2
+              examples: [2]
         duration:
           type: integer
           title: Track duration
           description: Track duration in seconds
-          example: 180
+          examples: [180]
         meta:
           type: object
           title: Track meta
@@ -1351,19 +1351,19 @@ components:
             channels:
               type: integer
               description: Number of audio channels
-              example: 2
+              examples: [2]
             sampleRate:
               type: integer
               description: Sample rate in Hz
-              example: 44100
+              examples: [44100]
             bitrate:
               type: integer
               description: Bitrate in bits per second
-              example: 128012
+              examples: [128012]
             lossless:
               type: boolean
               description: Whether the audio file is in a lossless/uncompressed format
-              example: false
+              examples: [false]
 
     User:
       type: object
@@ -1371,11 +1371,11 @@ components:
         id:
           type: string
           title: User ID
-          example: d7e33c2c-0454-4da5-b079-d46e7b47cf22
+          examples: [d7e33c2c-0454-4da5-b079-d46e7b47cf22]
         username:
           type: string
           title: Unique username. Used for Basic auth with username and password
-          example: user123
+          examples: [user123]
           minLength: 3
           maxLength: 24
           pattern: ^[a-zA-Z0-9-._]+$
@@ -1387,7 +1387,7 @@ components:
         disabled:
           type: boolean
           title: If true, the user cannot authenticate any API requests (even with tokens).
-          example: false
+          examples: [false]
 
     Token:
       type: object
@@ -1395,7 +1395,7 @@ components:
         id:
           type: string
           title: Token ID
-          example: 7e10e4ff-be3f-46d0-9865-941c3d6b62c8
+          examples: [7e10e4ff-be3f-46d0-9865-941c3d6b62c8]
         user:
           $ref: "#/components/schemas/User/properties/id"
         expires:
@@ -1404,7 +1404,7 @@ components:
             - integer
             - "null"
           format: unix-time
-          example: 1893448800
+          examples: [1893448800]
         scopes:
           type: array
           items:
@@ -1426,32 +1426,32 @@ components:
         page:
           description: The current page number
           type: integer
-          example: 1
+          examples: [1]
           minimum: 1
         limit:
           description: The maximum number of items per page
-          example: 100
+          examples: [100]
           minimum: 0
         total:
           description: The total number of items in the entire collection (not just the current page)
-          example: 91
+          examples: [91]
           minimum: 0
         href:
           description: The path and query parameters of the current page
           type: string
-          example: /path?and=query
+          examples: [/path?and=query]
         previous:
           description: The path and query parameters for the previous page, unless this is the first page
           type:
             - string
             - "null"
-          example: null
+          examples: [null]
         next:
           description: The path and query parameters for the next page, unless this is the last page
           type:
             - string
             - "null"
-          example: null
+          examples: [null]
 
     ErrorResponse:
       type: object
@@ -1461,12 +1461,12 @@ components:
           properties:
             message:
               type: string
-              example: A user-friendly error message.
+              examples: [A user-friendly error message.]
             fields:
               type: object
               additionalProperties:
                 type: string
-                example: Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.
+                examples: [Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.]
 
     BooleanLike:
       oneOf:
@@ -1476,7 +1476,7 @@ components:
           enum: ["true", "false", "1", "0", "on"]
         - type: integer
           enum: [1, 0]
-      example: false
+      examples: [false]
 
     UserWrite:
       type: object
@@ -1486,7 +1486,7 @@ components:
         password:
           type: string
           description: Plain-text password. Please use HTTPS.
-          example: "VerySecure123!"
+          examples: ["VerySecure123!"]
         scopes:
           $ref: "#/components/schemas/User/properties/scopes"
         disabled:
