@@ -193,7 +193,7 @@ namespace Token {
         public override list(options: {limit: number, offset: number}) {
             const rows = this.statements.list.all(options.limit, options.offset);
             return {
-                resources: rows.map(row => Token.row(row)),
+                resources: rows.map(Token.row),
                 total: this.statements.count.get()!.count
             };
         }
@@ -201,7 +201,7 @@ namespace Token {
         public listOfUser(user: User.ID, options: {limit: number, offset: number}) {
             const rows = this.statements.listOfUser.all(user.id, options.limit, options.offset);
             return {
-                resources: rows.map(row => Token.row(row)),
+                resources: rows.map(Token.row),
                 total: this.statements.count.get()!.count
             };
         }
