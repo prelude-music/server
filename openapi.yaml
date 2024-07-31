@@ -958,7 +958,12 @@ paths:
           in: query,
           description: "Get ALL tokens. By default, only the tokens of the authenticated user are returned.
             Incompatible with the `user` parameter.",
-          name: all
+          name: all,
+          required: false,
+          schema: {
+            type: string,
+            examples: [""]
+          }
         }
       ]
       responses:
