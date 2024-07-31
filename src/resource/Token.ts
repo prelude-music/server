@@ -255,6 +255,7 @@ namespace Token {
             note(body: any): string {
                 if (!("note" in body)) throw new ThrowableResponse(new FieldErrorResponse({note: "Please enter a note."}));
                 if (typeof body.note !== "string") throw new ThrowableResponse(new FieldErrorResponse({note: "Must be a string."}));
+                if (body.note.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
                 return body.note;
             },
             user(body: any): User.ID | null {
