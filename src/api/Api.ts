@@ -6,17 +6,20 @@ import ApiResponse from "../response/ApiResponse.js";
 import JsonResponse from "../response/JsonResponse.js";
 import FileResponse from "../response/FileResponse.js";
 import SystemFile from "../SystemFile.js";
+import ThrowableResponse from "../response/ThrowableResponse.js";
+import Library from "../Library.js";
 
 class Api {
     public constructor(
         private readonly controllers: Controller[],
-        private readonly packageJson: JsonResponse.Object
+        private readonly packageJson: JsonResponse.Object,
+        private readonly library: Library
     ) {
         this.controllers.unshift(new Api.RootController(this.packageJson.version as string));
     }
 
     public async requestListener(q: http.IncomingMessage, s: http.ServerResponse): Promise<void> {
-        const req = await ApiRequest.create(q, s);
+        const req = await ApiRequest.create(q, s, this.library);
         req.res.setHeader("Accept-Ranges", "bytes");
         req.res.setHeader("Access-Control-Allow-Origin", req.headers.origin ?? "*");
         req.res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -33,7 +36,13 @@ class Api {
 
         for (const controller of this.controllers)
             if (controller.match(req, urlParts)) {
-                (await controller.handle(req, urlParts)).send(req);
+                try {
+                    (await controller.handle(req, urlParts)).send(req);
+                }
+                catch (e) {
+                    if (e instanceof ThrowableResponse) e.response.send(req);
+                    else throw e;
+                }
                 return;
             }
         return Controller.endpointNotFound(req).send(req);
@@ -55,7 +64,7 @@ namespace Api {
         }
 
         public override async handle(req: ApiRequest): Promise<ApiResponse> {
-            if (req.method !== "GET") return Controller.methodNotAllowed(req);
+            if (!["GET", "HEAD"].includes(req.method)) return Controller.methodNotAllowed(req);
             switch (req.url.pathname as typeof this.paths[number]) {
                 case "/": return new JsonResponse({
                     prelude: {

@@ -26,7 +26,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Get resources
      */
-    protected list(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected list(req: ApiRequest, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -35,7 +35,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Create resource
      */
-    protected create(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected create(req: ApiRequest, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -44,7 +44,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Delete all resources
      */
-    protected deleteAll(req: ApiRequest, _urlParts: string[]): ApiResponse {
+    protected deleteAll(req: ApiRequest, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -53,7 +53,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Get resource
      */
-    protected get(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected get(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -62,7 +62,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Delete resource
      */
-    protected delete(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected delete(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -71,7 +71,7 @@ export default abstract class ResourceController extends Controller {
      *
      * Replace resource
      */
-    protected put(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected put(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
@@ -80,24 +80,24 @@ export default abstract class ResourceController extends Controller {
      *
      * Update resource
      */
-    protected patch(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse {
+    protected patch(req: ApiRequest, _id: string, _urlParts: string[]): ApiResponse | Promise<ApiResponse> {
         return Controller.methodNotAllowed(req);
     }
 
-    public override handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> | ApiResponse {
+    public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
         if (urlParts.length === this.pathStartIndex + 1) switch (req.method) {
-            case "GET": return this.list(req, urlParts);
-            case "POST": return this.create(req, urlParts);
-            case "DELETE": return this.deleteAll(req, urlParts);
+            case "GET": case "HEAD": return await this.list(req, urlParts);
+            case "POST": return await this.create(req, urlParts);
+            case "DELETE": return await this.deleteAll(req, urlParts);
             default: return Controller.methodNotAllowed(req);
         }
         if (urlParts.length === this.pathStartIndex + 2) {
             const id = urlParts[this.pathStartIndex + 1]!;
             switch (req.method) {
-                case "GET": return this.get(req, id, urlParts);
-                case "DELETE": return this.delete(req, id, urlParts);
-                case "PUT": return this.put(req, id, urlParts);
-                case "PATCH": return this.patch(req, id, urlParts);
+                case "GET": case "HEAD": return await this.get(req, id, urlParts);
+                case "DELETE": return await this.delete(req, id, urlParts);
+                case "PUT": return await this.put(req, id, urlParts);
+                case "PATCH": return await this.patch(req, id, urlParts);
                 default: return Controller.methodNotAllowed(req);
             }
         }

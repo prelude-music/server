@@ -1,5 +1,5 @@
 import {parseFile as getMetadataFromFile} from "music-metadata";
-import ID_ from "../ID.js";
+import HashID from "../HashID.js";
 import File from "../File.js";
 import Artist from "./Artist.js";
 import Album from "./Album.js";
@@ -16,6 +16,7 @@ import ErrorResponse from "../response/ErrorResponse.js";
 import FileResponse from "../response/FileResponse.js";
 import Library from "../Library.js";
 import BufferResponse from "../response/BufferResponse.js";
+import Token from "./Token.js";
 
 class Track extends ApiResource {
     public constructor(
@@ -83,7 +84,7 @@ class Track extends ApiResource {
 }
 
 namespace Track {
-    export class ID extends ID_ {
+    export class ID extends HashID {
         public constructor(id: string) {
             super(id);
         }
@@ -225,13 +226,15 @@ namespace Track {
         ];
 
         protected override list(req: ApiRequest): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const sort = req.url.searchParams.get("sort");
             const limit = req.limit();
             const tracks = this.library.repositories.tracks.list({limit: limit.limit, offset: limit.offset, sort});
             return new PageResponse(req, tracks.resources.map(t => t.json()), limit.page, limit.limit, tracks.total);
         }
 
-        protected override get(_req: ApiRequest, id: string): ApiResponse {
+        protected override get(req: ApiRequest, id: string): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const track = this.library.repositories.tracks.get(new Track.ID(id));
             if (track === null) return Track.Controller.notFound();
             return new JsonResponse(track.json());
@@ -252,7 +255,8 @@ namespace Track {
         }
 
         public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
-            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            if (!["GET", "HEAD"].includes(req.method)) return Controller_.methodNotAllowed(req);
+            req.require(Token.Scope.LIBRARY_READ);
             const track = this.library.repositories.tracks.get(new Track.ID(urlParts[1]!));
             if (track === null) return Track.Controller.notFound();
             if (!await track.file.isReadable()) {
@@ -273,7 +277,8 @@ namespace Track {
         }
 
         public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
-            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            if (!["GET", "HEAD"].includes(req.method)) return Controller_.methodNotAllowed(req);
+            req.require(Token.Scope.LIBRARY_READ);
             const track = this.library.repositories.tracks.get(new Track.ID(urlParts[1]!));
             if (track === null) return Track.Controller.notFound();
             if (!await track.file.isReadable()) {

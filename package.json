@@ -16,6 +16,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "argon2": "^0.40.3",
     "better-sqlite3": "^11.1.2",
     "enhanced-switch": "^1.1.7",
     "json5": "^2.2.3",

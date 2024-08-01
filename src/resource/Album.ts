@@ -1,4 +1,4 @@
-import ID_ from "../ID.js";
+import HashID from "../HashID.js";
 import Artist from "./Artist.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Repository_ from "../Repository.js";
@@ -11,6 +11,7 @@ import PageResponse from "../response/PageResponse.js";
 import ErrorResponse from "../response/ErrorResponse.js";
 import Library from "../Library.js";
 import BufferResponse from "../response/BufferResponse.js";
+import Token from "./Token.js";
 
 class Album extends ApiResource {
     public constructor(
@@ -31,7 +32,7 @@ class Album extends ApiResource {
 }
 
 namespace Album {
-    export class ID extends ID_ {
+    export class ID extends HashID {
         public constructor(id: string) {
             super(id);
         }
@@ -94,12 +95,14 @@ namespace Album {
         ]
 
         protected override list(req: ApiRequest): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const limit = req.limit();
             const albums = this.library.repositories.albums.list(limit);
             return new PageResponse(req, albums.resources.map(a => a.json()), limit.page, limit.limit, albums.total);
         }
 
-        protected override get(_req: ApiRequest, id: string): ApiResponse {
+        protected override get(req: ApiRequest, id: string): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const album = this.library.repositories.albums.get(new Album.ID(id));
             if (album === null) return Album.Controller.notFound();
             return new JsonResponse(album.json());
@@ -115,6 +118,7 @@ namespace Album {
         protected override readonly pathStartIndex = 2;
 
         protected override list(req: ApiRequest, urlParts: string[]): ApiResponse {
+            req.require(Token.Scope.LIBRARY_READ);
             const album = this.library.repositories.albums.get(new Album.ID(urlParts[1]!));
             if (album === null) return Album.Controller.notFound();
             const limit = req.limit();
@@ -133,7 +137,8 @@ namespace Album {
         }
 
         public override async handle(req: ApiRequest, urlParts: string[]): Promise<ApiResponse> {
-            if (req.method !== "GET") return Controller_.methodNotAllowed(req);
+            if (!["GET", "HEAD"].includes(req.method)) return Controller_.methodNotAllowed(req);
+            req.require(Token.Scope.LIBRARY_READ);
             const album = this.library.repositories.albums.get(new Album.ID(urlParts[1]!));
             if (album === null) return Album.Controller.notFound();
             const tracks = this.library.repositories.tracks.album(album.id, {limit: 5, offset: 0});

@@ -1,12 +1,12 @@
 import ApiResponse from "./ApiResponse.js";
 import ApiRequest from "../api/ApiRequest.js";
 
-class JsonResponse extends ApiResponse {
-    private readonly data: Readonly<JsonResponse.Object | JsonResponse.Array>;
+class JsonResponse<T extends JsonResponse.Object | JsonResponse.Array> extends ApiResponse {
+    protected readonly data: T;
 
-    public constructor(data: JsonResponse.Object | JsonResponse.Array, status: number = 200) {
+    public constructor(data: T, status: number = 200) {
         super(status);
-        this.data = Object.freeze(data);
+        this.data = data;
     }
 
     public override send(req: ApiRequest): void {

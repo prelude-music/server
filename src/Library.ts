@@ -5,6 +5,8 @@ import Artist from "./resource/Artist.js";
 import Album from "./resource/Album.js";
 import Track from "./resource/Track.js";
 import Config from "./Config.js";
+import User from "./resource/User.js";
+import Token from "./resource/Token.js";
 
 export default class Library {
     /**
@@ -35,14 +37,16 @@ export default class Library {
         "wma"                  // WMA
     ];
 
-    public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository };
+    public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository, users: User.Repository, tokens: Token.Repository };
 
-    public constructor(private readonly db: Database, private readonly config: Config) {
+    public constructor(private readonly db: Database, public readonly config: Config) {
         this.db = new Database(this.config.db);
         this.repositories = {
             artists: new Artist.Repository(this.db),
             albums: new Album.Repository(this.db),
-            tracks: new Track.Repository(this.db)
+            tracks: new Track.Repository(this.db),
+            users: new User.Repository(this.db),
+            tokens: new Token.Repository(this.db),
         }
     }
 

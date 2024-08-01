@@ -4,6 +4,7 @@ import Config from "./Config.js";
 import Api from "./api/Api.js";
 import JsonResponse from "./response/JsonResponse.js";
 import Controller from "./api/Controller.js";
+import Library from "./Library.js";
 
 export default class Server {
     private readonly http: http.Server;
@@ -12,8 +13,9 @@ export default class Server {
         public readonly config: Config,
         packageJson: JsonResponse.Object,
         controllers: Controller[],
+        library: Library
     ) {
-        const api = new Api(controllers,packageJson);
+        const api = new Api(controllers, packageJson, library);
         this.http = http.createServer<typeof http.IncomingMessage, typeof http.ServerResponse>(api.requestListener.bind(api));
     }
 

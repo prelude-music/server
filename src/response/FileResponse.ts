@@ -16,7 +16,7 @@ class FileResponse extends ApiResponse {
         catch (e) {
             if (e instanceof Error && "code" in e && e.code === "ENOENT")
                 return new ErrorResponse(404, "File not found").send(req);
-            return new ErrorResponse(500, "Internal server error", e as Error).send(req);
+            return new ErrorResponse(500, "Internal server error", {}, e as Error).send(req);
         }
 
         const rangeHeader = req.req.headers["range"];
@@ -27,7 +27,7 @@ class FileResponse extends ApiResponse {
         catch (e) {
             if (e instanceof SyntaxError)
                 return new ErrorResponse(400, e.message).send(req);
-            else return new ErrorResponse(500, "Internal server error", e as Error).send(req);
+            else return new ErrorResponse(500, "Internal server error", {}, e as Error).send(req);
         }
         if (ranges !== null && this.status === 200) {
             if (ranges.ranges.length === 0) return new ErrorResponse(400, "No ranges were specified").send(req);
@@ -38,7 +38,7 @@ class FileResponse extends ApiResponse {
             catch (e) {
                 if (e instanceof RangeError)
                     return new ErrorResponse(416, e.message).send(req);
-                else return new ErrorResponse(500, "Internal server error", e as Error).send(req);
+                else return new ErrorResponse(500, "Internal server error", {}, e as Error).send(req);
             }
            if (absoluteRanges.ranges.length === 1) {
                req.res.setHeader("Content-Type", this.file.type ?? "application/octet-stream");

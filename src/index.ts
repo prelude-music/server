@@ -8,6 +8,9 @@ import Database from "./db/Database.js";
 import Artist from "./resource/Artist.js";
 import Album from "./resource/Album.js";
 import Track from "./resource/Track.js";
+import User from "./resource/User.js";
+import Token from "./resource/Token.js";
+import Password from "./Password.js";
 
 const configArgIndex = process.argv.findIndex(arg => arg === "--config" || arg === "-c");
 const customConfig = configArgIndex >= 0 && process.argv.length > configArgIndex + 1;
@@ -41,12 +44,30 @@ const server = await new Server(config, packageJson, [
     new Artist.Controller(library),
     new Album.Controller(library),
     new Track.Controller(library),
-]).listen();
+    new User.Controller(library),
+    new Token.Controller(library),
+], library).listen();
 console.log(`Server listening on http://0.0.0.0:${config.port}`);
 
 console.log("Reloading library... (this may take a while)");
 const libLoad = await library.reload();
 console.log(`Library loaded. Added ${libLoad.added} new track${libLoad.added === 1 ? "" : "s"}${libLoad.removed > 0 ? `, removed ${libLoad.removed} orphaned track${libLoad.removed === 1 ? "" : "s"}` : ""}.`);
+
+// if no users in db, create default admin user
+if (library.repositories.users.list({limit: 0, offset: 0}).total === 0) {
+    // using token secret generator just to get a good password
+    const password = Token.Secret.random().id;
+    library.repositories.users.save(new User(
+        User.ID.random(),
+        "admin",
+        new Set(Object.values(Token.Scope)), // all scopes
+        await Password.hash(password),
+        false
+    ));
+    console.log("Generated a default administrator user:");
+    console.log("Username: admin");
+    console.log("Password: " + password);
+}
 
 process.on("SIGINT", async () => {
     console.log("\rStopping...");
