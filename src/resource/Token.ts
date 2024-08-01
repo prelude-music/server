@@ -193,7 +193,7 @@ namespace Token {
         public override list(options: {limit: number, offset: number}) {
             const rows = this.statements.list.all(options.limit, options.offset);
             return {
-                resources: rows.map(row => Token.row(row)),
+                resources: rows.map(Token.row),
                 total: this.statements.count.get()!.count
             };
         }
@@ -201,7 +201,7 @@ namespace Token {
         public listOfUser(user: User.ID, options: {limit: number, offset: number}) {
             const rows = this.statements.listOfUser.all(user.id, options.limit, options.offset);
             return {
-                resources: rows.map(row => Token.row(row)),
+                resources: rows.map(Token.row),
                 total: this.statements.count.get()!.count
             };
         }
@@ -255,6 +255,7 @@ namespace Token {
             note(body: any): string {
                 if (!("note" in body)) throw new ThrowableResponse(new FieldErrorResponse({note: "Please enter a note."}));
                 if (typeof body.note !== "string") throw new ThrowableResponse(new FieldErrorResponse({note: "Must be a string."}));
+                if (body.note.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
                 return body.note;
             },
             user(body: any): User.ID | null {
