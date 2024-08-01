@@ -153,7 +153,7 @@ namespace Playlist {
                 return body.name;
             },
             user(auth: Authorisation, users: User.Repository, body: any): User.ID {
-                if (!auth.scopes.has(Token.Scope.PLAYLISTS_WRITE_ALL) || !("user" in body)) return auth.user.id;
+                if (!auth.has(Token.Scope.PLAYLISTS_WRITE_ALL) || !("user" in body)) return auth.user.id;
                 if (typeof body.user !== "string") throw new ThrowableResponse(new FieldErrorResponse({user: "Must be a string."}));
                 const user = users.get(new User.ID(body.user));
                 if (user === null) throw new ThrowableResponse(new FieldErrorResponse({user: "A user with the provided ID does not exist."}, {}, 404));
@@ -184,7 +184,7 @@ namespace Playlist {
             req.require(Token.Scope.PLAYLISTS_READ);
             const limit = req.limit();
             let playlists: {resources: Playlist[], total: number};
-            if (req.url.searchParams.has("all") && !req.auth!.scopes.has(Token.Scope.PLAYLISTS_READ_ALL))
+            if (req.url.searchParams.has("all") && !req.auth!.has(Token.Scope.PLAYLISTS_READ_ALL))
                 playlists = this.library.repositories.playlists.list(limit);
             else if (req.url.searchParams.has("public"))
                 playlists = this.library.repositories.playlists.listPublicExceptUser(req.auth!.user.id, limit);
@@ -208,9 +208,9 @@ namespace Playlist {
 
         public override deleteAll(req: ApiRequest): ApiResponse {
             if (req.auth === null) return Authorisation.UNAUTHORISED;
-            if (req.auth.scopes.has(Token.Scope.PLAYLISTS_WRITE_ALL))
+            if (req.auth.has(Token.Scope.PLAYLISTS_WRITE_ALL))
                 this.library.repositories.playlists.deleteAll();
-            else if (req.auth.scopes.has(Token.Scope.PLAYLISTS_WRITE))
+            else if (req.auth.has(Token.Scope.PLAYLISTS_WRITE))
                 this.library.repositories.playlists.deleteOfUser(req.auth.user.id);
             else return Authorisation.FORBIDDEN;
             return new EmptyReponse();
@@ -219,14 +219,14 @@ namespace Playlist {
         protected override get(req: ApiRequest, id: string): ApiResponse {
             req.require(Token.Scope.PLAYLISTS_READ);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (playlist.visibility === Playlist.Visibility.PRIVATE && !req.auth!.scopes.has(Token.Scope.PLAYLISTS_READ_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (playlist.visibility === Playlist.Visibility.PRIVATE && !req.auth!.has(Token.Scope.PLAYLISTS_READ_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
             return new JsonResponse(playlist.json());
         }
 
         protected override delete(req: ApiRequest, id: string): ApiResponse {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.scopes.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
             this.library.repositories.playlists.delete(playlist.id);
             return new EmptyReponse();
         }
@@ -235,7 +235,7 @@ namespace Playlist {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.scopes.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
             const name = this.extract.name(req.body);
             const visibility = this.extract.visibility(req.body);
             const tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
@@ -250,7 +250,7 @@ namespace Playlist {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.scopes.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
             if ("name" in req.body) playlist.name = this.extract.name(req.body);
             if ("visibility" in req.body) playlist.visibility = this.extract.visibility(req.body);
             if ("tracks" in req.body) playlist.tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
