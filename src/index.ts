@@ -62,7 +62,7 @@ if (library.repositories.users.list({limit: 0, offset: 0}).total === 0) {
     library.repositories.users.save(new User(
         User.ID.random(),
         "admin",
-        new Set(Object.values(Token.Scope)), // all scopes
+        new Set([Token.Scope.ADMIN]),
         await Password.hash(password),
         false
     ));

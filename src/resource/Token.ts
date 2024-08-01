@@ -191,6 +191,12 @@ namespace Token {
          * Recommended for: admin
          */
         PLAYLISTS_WRITE_ALL = "playlists:write:all",
+
+        /**
+         * Grants full administrative access.
+         * This scope acts as a wildcard, providing full access even if new API scopes are introduced in future updates.
+         */
+        ADMIN = "admin",
     }
 
     export class Repository extends Repository_<Token> {
@@ -294,11 +300,11 @@ namespace Token {
             token(req: ApiRequest, repo: Token.Repository, id: string): Token {
                 if (req.auth === null)
                     throw new ThrowableResponse(Authorisation.UNAUTHORISED);
-                if (!req.auth.scopes.has(Token.Scope.TOKENS_READ_ALL) && !req.auth.scopes.has(Token.Scope.TOKENS_READ_SELF))
+                if (!req.auth.has(Token.Scope.TOKENS_READ_ALL) && !req.auth.has(Token.Scope.TOKENS_READ_SELF))
                     throw new ThrowableResponse(Authorisation.FORBIDDEN);
 
                 const token = repo.get(new Token.ID(id));
-                if (token === null || (!req.auth.scopes.has(Token.Scope.TOKENS_READ_ALL) && !token.user.equals(req.auth.user.id)))
+                if (token === null || (!req.auth.has(Token.Scope.TOKENS_READ_ALL) && !token.user.equals(req.auth.user.id)))
                     throw new ThrowableResponse(Token.Controller.notFound());
                 return token;
             }
@@ -309,7 +315,7 @@ namespace Token {
          */
         private validateScopes(auth: Authorisation, scopes: Set<Token.Scope>) {
             for (const scope of scopes)
-                if (!auth.scopes.has(scope)) throw new ThrowableResponse(new FieldErrorResponse({scopes: `You don't have permission to grant scope ${scope} in the current authorisation context.`}, {}, 403));
+                if (!auth.has(scope)) throw new ThrowableResponse(new FieldErrorResponse({scopes: `You don't have permission to grant scope ${scope} in the current authorisation context.`}, {}, 403));
         }
 
         public static notFound() {
@@ -318,9 +324,9 @@ namespace Token {
 
         protected override list(req: ApiRequest): ApiResponse {
             if (req.auth === null) return Authorisation.UNAUTHORISED;
-            if (!req.auth.scopes.has(Token.Scope.TOKENS_READ_ALL) && !req.auth.scopes.has(Token.Scope.TOKENS_READ_SELF)) return Authorisation.FORBIDDEN;
+            if (!req.auth.has(Token.Scope.TOKENS_READ_ALL) && !req.auth.has(Token.Scope.TOKENS_READ_SELF)) return Authorisation.FORBIDDEN;
             const limit = req.limit();
-            const tokens = req.auth.scopes.has(Token.Scope.TOKENS_READ_ALL)
+            const tokens = req.auth.has(Token.Scope.TOKENS_READ_ALL)
                 ? (req.url.searchParams.has("user")
                     ? this.library.repositories.tokens.listOfUser(new User.ID(req.url.searchParams.get("user")!), limit)
                     : (req.url.searchParams.has("all")
@@ -334,9 +340,9 @@ namespace Token {
         protected override create(req: ApiRequest): ApiResponse {
             if (req.auth === null) return Authorisation.UNAUTHORISED;
 
-            const userId = req.auth.scopes.has(Token.Scope.TOKENS_WRITE_SELF)
+            const userId = req.auth.has(Token.Scope.TOKENS_WRITE_SELF)
                 ? req.auth.user.id
-                : (req.auth.scopes.has(Token.Scope.TOKENS_WRITE_ALL)
+                : (req.auth.has(Token.Scope.TOKENS_WRITE_ALL)
                     ? this.extract.user(req.body) ?? req.auth.user.id
                     : null);
             if (userId === null) return Authorisation.FORBIDDEN;
@@ -356,8 +362,8 @@ namespace Token {
 
         protected override deleteAll(req: ApiRequest): ApiResponse {
             if (req.auth === null) return Authorisation.UNAUTHORISED;
-            if (req.auth.scopes.has(Token.Scope.TOKENS_WRITE_ALL)) this.library.repositories.tokens.deleteAll();
-            else if (req.auth.scopes.has(Token.Scope.TOKENS_WRITE_SELF)) this.library.repositories.tokens.deleteOfUser(req.auth.user.id);
+            if (req.auth.has(Token.Scope.TOKENS_WRITE_ALL)) this.library.repositories.tokens.deleteAll();
+            else if (req.auth.has(Token.Scope.TOKENS_WRITE_SELF)) this.library.repositories.tokens.deleteOfUser(req.auth.user.id);
             else return Authorisation.FORBIDDEN;
             return new EmptyReponse();
         }
