@@ -147,7 +147,7 @@ namespace Playlist {
 
         private readonly extract = {
             name(body: any): string {
-                if (!("name" in body)) throw new ThrowableResponse(new FieldErrorResponse({expires: "Please enter a name for this playlist."}));
+                if (!("name" in body)) throw new ThrowableResponse(new FieldErrorResponse({name: "Please enter a name for this playlist."}));
                 if (typeof body.name !== "string") throw new ThrowableResponse(new FieldErrorResponse({name: "Must be a string."}));
                 if (body.name.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
                 return body.name;
@@ -160,7 +160,7 @@ namespace Playlist {
                 return user.id;
             },
             visibility(body: any): Playlist.Visibility {
-                if (!("visibility" in body)) throw new ThrowableResponse(new FieldErrorResponse({expires: "Please select playlist visibility."}));
+                if (!("visibility" in body)) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Please select playlist visibility."}));
                 if (typeof body.visibility !== "string") throw new ThrowableResponse(new FieldErrorResponse({visibility: "Must be a string."}));
                 if (!Object.values(Playlist.Visibility).includes(body.visibility as Playlist.Visibility)) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Invalid visibility setting."}));
                 return body.visibility as Playlist.Visibility;
