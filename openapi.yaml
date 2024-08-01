@@ -57,31 +57,33 @@ tags: [
   {
     name: Tokens,
     description: "Tokens enable authentication with the Prelude server. Using the token scopes,
-      you can control what endpoints the API token can be used for.
-      
-      
-      The available token scopes are:
-      
-      | Scope             | Description                                                                                              | Recommended For |
-      
-      |-------------------|----------------------------------------------------------------------------------------------------------|-----------------|
-      
-      | `library:read`    | Read-only access to Artists, Albums, and Tracks.                                                        | everyone        |
-      
-      | `library:write`   | Write/modify access to Artists, Albums, and Tracks. Allows the user to upload/delete audio files.        | admin           |
-      
-      | `tokens:read:self`| Read-only access to your Tokens.                                                                        | everyone        |
-      
-      | `tokens:write:self`| Write/modify access to your Tokens.                                                                      | everyone        |
-      
-      | `tokens:read:all` | Read-only access to everyone's Tokens.                                                                  | admin           |
-      
-      | `tokens:write:all`| Write/modify access to everyone's Tokens.                                                                | admin           |
-      
-      | `users:read`      | Read-only access to Users.                                                                              | admin           |
-      
-      | `users:write`     | Write/modify access to Users.                                                                           | admin           |
-      "
+you can control what endpoints the API token can be used for.
+
+
+The available token scopes are:
+
+| Scope               | Description                                                                                       | Recommended For |
+
+|---------------------|---------------------------------------------------------------------------------------------------|-----------------|
+
+| `library:read`      | Read-only access to Artists, Albums, and Tracks.                                                  | everyone        |
+
+| `library:write`     | Write/modify access to Artists, Albums, and Tracks. Allows the user to upload/delete audio files. | admin           |
+
+| `tokens:read:self`  | Read-only access to your Tokens.                                                                  | everyone        |
+
+| `tokens:write:self` | Write/modify access to your Tokens.                                                               | everyone        |
+
+| `tokens:read:all`   | Read-only access to everyone's Tokens.                                                            | admin           |
+
+| `tokens:write:all`  | Write/modify access to everyone's Tokens.                                                         | admin           |
+
+| `users:read`        | Read-only access to Users.                                                                        | admin           |
+
+| `users:write`       | Write/modify access to Users.                                                                     | admin           |
+
+| `admin`             | Grants full administrative access, including future API scopes.                                   | admin           |
+"
   }
 
 ]
