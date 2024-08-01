@@ -60,3 +60,15 @@ CREATE TABLE IF NOT EXISTS `tokens`
 );
 
 CREATE INDEX IF NOT EXISTS `tokens_user` ON `tokens` (`user`);
+
+CREATE TABLE IF NOT EXISTS `playlists`
+(
+    `id`         CHAR(36) PRIMARY KEY NOT NULL COLLATE nocase,
+    `name`       VARCHAR(128)         NOT NULL COLLATE nocase,
+    `user`       CHAR(36)             NOT NULL COLLATE nocase,
+    `visibility` VARCHAR(8)           NOT NULL COLLATE nocase,
+    `tracks`     TEXT                 NOT NULL COLLATE binary,
+    FOREIGN KEY (`user`) REFERENCES `users` (`id`)
+);
+
+CREATE INDEX IF NOT EXISTS `playlist_user` ON `playlists` (`user`);
