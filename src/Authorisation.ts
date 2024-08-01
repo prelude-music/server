@@ -8,12 +8,16 @@ import ErrorResponse from "./response/ErrorResponse.js";
 export default class Authorisation {
     public constructor(
         public readonly user: User,
-        public readonly scopes: Readonly<Set<Token.Scope>>
+        private readonly scopes: Readonly<Set<Token.Scope>>
     ) {
     }
 
     public require(scope: Token.Scope): void {
-        if (!this.scopes.has(scope)) throw new ThrowableResponse(Authorisation.FORBIDDEN);
+        if (!this.has(scope)) throw new ThrowableResponse(Authorisation.FORBIDDEN);
+    }
+
+    public has(scope: Token.Scope): boolean {
+        return this.scopes.has(scope) || this.scopes.has(Token.Scope.ADMIN);
     }
 
     public static fromToken(secret: Token.Secret, library: Library): Authorisation | null {
