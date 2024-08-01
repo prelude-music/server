@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 
 info:
   title: Prelude API
@@ -7,6 +7,13 @@ info:
   license:
     name: GNU General Public License v3.0
     url: https://github.com/prelude-music/server/blob/main/LICENSE
+
+servers:
+  - url: "{baseUrl}"
+    variables:
+      baseUrl:
+        description: The base URL of your Prelude server
+        default: "http://localhost:9847"
 
 tags: [
   {
@@ -85,6 +92,8 @@ paths:
       tags: [Prelude]
       summary: API Server Info
       description: Basic information about the running Prelude server instance.
+      security: []
+      operationId: info
       responses:
         200:
           description: Prelude API server info
@@ -99,7 +108,7 @@ paths:
                       version:
                         type: string
                         description: The version of the Prelude server and the API. Follows semantic versioning and can be used to determine compatibility between a client and the server.
-                        example: 0.0.0
+                        examples: [0.0.0]
                       spec:
                         type: object
                         description: OpenAPI specification file paths
@@ -107,33 +116,43 @@ paths:
                           json:
                             type: string
                             description: Parsed from the server's YAML OpenAPI specification and literally converted to JSON
-                            example: openapi.json
+                            examples: [openapi.json]
                           yaml:
                             type: string
                             description: The OpenAPI specification from the server repository
-                            example: openapi.yaml
+                            examples: [openapi.yaml]
+        4XX:
+          description: "Client error"
 
   /openapi.yaml:
     get:
       tags: [Prelude]
       summary: OpenAPI YAML Specification
       description: The OpenAPI specification from the server repository
+      security: []
+      operationId: getOpenapiYaml
       responses:
         200:
           description: The raw file
           content:
             text/yaml: {}
+        4XX:
+          description: "Client error"
 
   /openapi.json:
     get:
       tags: [Prelude]
       summary: OpenAPI JSON Specification
       description: A JSON version of the OpenAPI specification. This is a literal JSON representation of YAML version.
+      security: []
+      operationId: getOpenapiJson
       responses:
         200:
           description: A parsed representation from the YAML version, serialised into JSON
           content:
             application/json: {}
+        4XX:
+          description: "Client error"
 
   /artists:
     get:
@@ -142,6 +161,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtists
       parameters: [
         {
           in: query,
@@ -180,7 +200,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -199,6 +219,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getArtist
       parameters: [
         {
           in: path,
@@ -232,6 +253,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtistAlbums
       parameters: [
         {
           in: path,
@@ -267,7 +289,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -286,6 +308,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listArtistTracks
       parameters: [
         {
           in: path,
@@ -321,7 +344,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -340,6 +363,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getArtistImage
       parameters: [
         {
           in: path,
@@ -377,6 +401,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listAlbums
       parameters: [
         {
           in: query,
@@ -406,7 +431,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -425,6 +450,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getAlbum
       parameters: [
         {
           in: path,
@@ -459,6 +485,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listAlbumTracks
       parameters: [
         {
           in: path,
@@ -494,7 +521,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -514,6 +541,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getAlbumImage
       parameters: [
         {
           in: path,
@@ -545,6 +573,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: listTracks
       parameters: [
         {
           in: query,
@@ -582,7 +611,7 @@ paths:
               duration:asc,
               duration:desc
             ],
-            example: duration:desc
+            examples: [duration:desc]
           }
         }
       ]
@@ -593,7 +622,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -612,6 +641,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrack
       parameters: [
         {
           in: path,
@@ -645,6 +675,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrackAudio
       parameters: [
         {
           in: path,
@@ -692,6 +723,7 @@ paths:
       security:
         - basic: [library:read]
         - bearer: [library:read]
+      operationId: getTrackImage
       parameters: [
         {
           in: path,
@@ -723,6 +755,7 @@ paths:
       security:
         - basic: [users:read]
         - bearer: [users:read]
+      operationId: listUsers
       parameters: [
         {
           in: query,
@@ -752,7 +785,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -769,6 +802,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: createUser
       requestBody:
         $ref: "#/components/requestBodies/User"
       responses:
@@ -789,6 +823,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: deleteAllUsers
       responses:
         204:
           description: All users deleted successfully
@@ -804,6 +839,7 @@ paths:
       security:
         - basic: [users:read]
         - bearer: [users:read]
+      operationId: getUser
       parameters: [
         {
           in: path,
@@ -835,6 +871,7 @@ paths:
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: deleteUser
       parameters: [
         {
           in: path,
@@ -852,10 +889,11 @@ paths:
           $ref: "#/components/responses/Forbidden"
     put:
       tags: [Users]
-      summary: Update User
+      summary: Replace User
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: replaceUser
       parameters: [
         {
           in: path,
@@ -885,10 +923,11 @@ paths:
           $ref: "#/components/responses/Forbidden"
     patch:
       tags: [Users]
-      summary: Partially Update User
+      summary: Update User
       security:
         - basic: [users:write]
         - bearer: [users:write]
+      operationId: updateUser
       parameters: [
         {
           in: path,
@@ -932,6 +971,7 @@ paths:
         - bearer: [tokens:read:self]
         - basic: [tokens:read:all]
         - bearer: [tokens:read:all]
+      operationId: listTokens
       parameters: [
         {
           in: query,
@@ -965,7 +1005,12 @@ paths:
           in: query,
           description: "Get ALL tokens. By default, only the tokens of the authenticated user are returned.
             Incompatible with the `user` parameter.",
-          name: all
+          name: all,
+          required: false,
+          schema: {
+            type: string,
+            examples: [""]
+          }
         }
       ]
       responses:
@@ -975,7 +1020,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/Page<T>"
+                  - $ref: "#/components/schemas/Page"
                   - type: object
                     properties:
                       resources:
@@ -994,6 +1039,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: createToken
       requestBody:
         content:
           application/json:
@@ -1039,7 +1085,7 @@ paths:
                       secret:
                         type: string
                         description: The token secret key used for authenticating requests. This is never available again.
-                        example: ED80gmnuZumZ5N2kA0exhN2FVjpdBdk2jVze
+                        examples: [ED80gmnuZumZ5N2kA0exhN2FVjpdBdk2jVze]
         401:
           $ref: "#/components/responses/Unauthorised"
         403:
@@ -1052,6 +1098,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: deleteAllTokens
       responses:
         204:
           description: All tokens deleted successfully
@@ -1069,6 +1116,7 @@ paths:
         - bearer: [tokens:read:self]
         - basic: [tokens:read:all]
         - bearer: [tokens:read:all]
+      operationId: getToken
       parameters: [
         {
           in: path,
@@ -1102,6 +1150,7 @@ paths:
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: deleteToken
       parameters: [
         {
           in: path,
@@ -1125,12 +1174,13 @@ paths:
           $ref: "#/components/responses/Forbidden"
     put:
       tags: [Tokens]
-      summary: Update Token
+      summary: Replace Token
       security:
         - basic: [tokens:write:self]
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: replaceToken
       parameters: [
         {
           in: path,
@@ -1174,12 +1224,13 @@ paths:
           $ref: "#/components/responses/Forbidden"
     patch:
       tags: [Tokens]
-      summary: Partially Update Token
+      summary: Update Token
       security:
         - basic: [tokens:write:self]
         - bearer: [tokens:write:self]
         - basic: [tokens:write:all]
         - bearer: [tokens:write:all]
+      operationId: updateToken
       parameters: [
         {
           in: path,
@@ -1256,17 +1307,18 @@ components:
         id:
           type: string
           title: Artist ID
-          example: h0+wZAY3FUjqOPmL1WODJCH1L44
+          examples: [h0+wZAY3FUjqOPmL1WODJCH1L44]
         name:
           type: string
           title: Name of the artist
-          example: Johann Sebastian Bach
+          examples: [Johann Sebastian Bach]
         image:
-          type: string
+          type:
+            - string
+            - "null"
           title: Artist image
           format: uri
-          nullable: true
-          example: https://example.com/image.jpg
+          examples: [https://example.com/image.jpg]
 
     Album:
       type: object
@@ -1275,11 +1327,11 @@ components:
         id:
           type: string
           title: Album ID
-          example: GxLAk47P9IJnxLHcW2WKJ+a0Wv4
+          examples: [GxLAk47P9IJnxLHcW2WKJ+a0Wv4]
         name:
           type: string
           title: Album name
-          example: The Well-Tempered Clavier. Book I
+          examples: [The Well-Tempered Clavier. Book I]
         artist:
           $ref: "#/components/schemas/Artist/properties/id"
 
@@ -1289,62 +1341,67 @@ components:
         id:
           type: string
           title: Track ID
-          example: lJzqGqUGjPdAI+bEOrtHeLstgTU
+          examples: [lJzqGqUGjPdAI+bEOrtHeLstgTU]
         title:
           type: string
           title: Track title
           description: If a title is not specified in the metadata, this will default to the base name of the file, including the extension.
-          example: Prelude and Fugue in C Minor, BWV 847
+          examples: [Prelude and Fugue in C Minor, BWV 847]
         artist:
           $ref: "#/components/schemas/Artist/properties/id"
         album:
           description: This is nullable as tracks are not required to be part of an album.
-          allOf: [
-            {$ref: "#/components/schemas/Album/properties/id"}
+          oneOf: [
+            {$ref: "#/components/schemas/Album/properties/id"},
+            {type: "null"}
           ]
-          nullable: true
         year:
-          type: integer
+          type:
+            - integer
+            - "null"
           title: Track year
-          example: 1722
-          nullable: true
+          examples: [1722]
         genres:
           type: array
           items:
             type: string
-            example: classical
+            examples: [classical]
           title: Track genres
         track:
-          type: object
-          nullable: true
+          type:
+            - object
+            - "null"
           properties:
             no:
               type: integer
               title: Track number
-              example: 2
+              examples: [2]
             of:
-              type: integer
+              type:
+                - integer
+                - "null"
               title: Of total tracks (presumably in the album)
-              example: 24
-              nullable: true
+              examples: [24]
         disk:
-          type: object
-          nullable: true
+          type:
+            - object
+            - "null"
           properties:
             no:
               type: integer
               title: Disk number
-              example: 1
+              examples: [1]
             of:
-              type: integer
+              type:
+                - integer
+                - "null"
               title: Of total disks
-              example: 2
-              nullable: true
+              examples: [2]
         duration:
           type: integer
           title: Track duration
           description: Track duration in seconds
-          example: 180
+          examples: [180]
         meta:
           type: object
           title: Track meta
@@ -1352,19 +1409,19 @@ components:
             channels:
               type: integer
               description: Number of audio channels
-              example: 2
+              examples: [2]
             sampleRate:
               type: integer
               description: Sample rate in Hz
-              example: 44100
+              examples: [44100]
             bitrate:
               type: integer
               description: Bitrate in bits per second
-              example: 128012
+              examples: [128012]
             lossless:
               type: boolean
               description: Whether the audio file is in a lossless/uncompressed format
-              example: false
+              examples: [false]
 
     User:
       type: object
@@ -1372,11 +1429,11 @@ components:
         id:
           type: string
           title: User ID
-          example: d7e33c2c-0454-4da5-b079-d46e7b47cf22
+          examples: [d7e33c2c-0454-4da5-b079-d46e7b47cf22]
         username:
           type: string
           title: Unique username. Used for Basic auth with username and password
-          example: user123
+          examples: [user123]
           minLength: 3
           maxLength: 24
           pattern: ^[a-zA-Z0-9-._]+$
@@ -1388,7 +1445,7 @@ components:
         disabled:
           type: boolean
           title: If true, the user cannot authenticate any API requests (even with tokens).
-          example: false
+          examples: [false]
 
     Token:
       type: object
@@ -1396,15 +1453,16 @@ components:
         id:
           type: string
           title: Token ID
-          example: 7e10e4ff-be3f-46d0-9865-941c3d6b62c8
+          examples: [7e10e4ff-be3f-46d0-9865-941c3d6b62c8]
         user:
           $ref: "#/components/schemas/User/properties/id"
         expires:
           description: The date in Unix time when the token expires. If null, the token does not expire. After the token expires, the server will consider it invalid.
-          type: integer
+          type:
+            - integer
+            - "null"
           format: unix-time
-          nullable: true
-          example: 1893448800
+          examples: [1893448800]
         scopes:
           type: array
           items:
@@ -1419,37 +1477,39 @@ components:
       type: string
       enum: [library:read, library:write, tokens:read:self, tokens:write:self, tokens:read:all, tokens:write:all, users:read, users:write]
 
-    Page<T>:
+    Page:
       description: A page is a partial list of items from a larger collection
       type: object
       properties:
         page:
           description: The current page number
           type: integer
-          example: 1
+          examples: [1]
           minimum: 1
         limit:
           description: The maximum number of items per page
-          example: 100
+          examples: [100]
           minimum: 0
         total:
           description: The total number of items in the entire collection (not just the current page)
-          example: 91
+          examples: [91]
           minimum: 0
         href:
           description: The path and query parameters of the current page
           type: string
-          example: /path?and=query
+          examples: [/path?and=query]
         previous:
           description: The path and query parameters for the previous page, unless this is the first page
-          type: string
-          nullable: true
-          example: null
+          type:
+            - string
+            - "null"
+          examples: [null]
         next:
           description: The path and query parameters for the next page, unless this is the last page
-          type: string
-          nullable: true
-          example: null
+          type:
+            - string
+            - "null"
+          examples: [null]
 
     ErrorResponse:
       type: object
@@ -1459,12 +1519,12 @@ components:
           properties:
             message:
               type: string
-              example: A user-friendly error message.
+              examples: [A user-friendly error message.]
             fields:
               type: object
               additionalProperties:
                 type: string
-                example: Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.
+                examples: [Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.]
 
     BooleanLike:
       oneOf:
@@ -1474,7 +1534,7 @@ components:
           enum: ["true", "false", "1", "0", "on"]
         - type: integer
           enum: [1, 0]
-      example: false
+      examples: [false]
 
     UserWrite:
       type: object
@@ -1484,7 +1544,7 @@ components:
         password:
           type: string
           description: Plain-text password. Please use HTTPS.
-          example: "VerySecure123!"
+          examples: ["VerySecure123!"]
         scopes:
           $ref: "#/components/schemas/User/properties/scopes"
         disabled:
