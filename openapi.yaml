@@ -822,6 +822,25 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
     delete:
       tags: [Users]
       summary: Delete All Users
@@ -927,6 +946,25 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
     patch:
       tags: [Users]
       summary: Update User
@@ -967,6 +1005,25 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
 
   /tokens:
     get:
