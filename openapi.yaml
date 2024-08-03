@@ -1153,6 +1153,8 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
     delete:
       tags: [Tokens]
       summary: Delete All Tokens
@@ -1285,6 +1287,8 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
     patch:
       tags: [Tokens]
       summary: Update Token
@@ -1333,6 +1337,8 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
 
   /playlists:
     get:
