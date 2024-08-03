@@ -389,7 +389,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        503:
+        502:
           description: Failed to proxy the artist's external image
           content:
             application/json:

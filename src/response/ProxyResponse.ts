@@ -33,6 +33,6 @@ export default class ProxyResponse extends ApiResponse {
     }
 
     private proxyError(res: Response) {
-        return new ErrorResponse(503, `Failed to proxy URL "${this.url}": got ${res.status} ${res.headers.get("content-type") ?? "(no content-type)"}`);
+        return new ErrorResponse(502, `Failed to proxy URL "${this.url}": got ${res.status} ${res.headers.get("content-type") ?? "(no content-type)"}`);
     }
 }
