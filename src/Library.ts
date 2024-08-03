@@ -7,6 +7,7 @@ import Track from "./resource/Track.js";
 import Config from "./Config.js";
 import User from "./resource/User.js";
 import Token from "./resource/Token.js";
+import Playlist from "./resource/Playlist.js";
 
 export default class Library {
     /**
@@ -37,7 +38,7 @@ export default class Library {
         "wma"                  // WMA
     ];
 
-    public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository, users: User.Repository, tokens: Token.Repository };
+    public readonly repositories: { artists: Artist.Repository, albums: Album.Repository, tracks: Track.Repository, users: User.Repository, tokens: Token.Repository, playlists: Playlist.Repository };
 
     public constructor(private readonly db: Database, public readonly config: Config) {
         this.db = new Database(this.config.db);
@@ -47,6 +48,7 @@ export default class Library {
             tracks: new Track.Repository(this.db),
             users: new User.Repository(this.db),
             tokens: new Token.Repository(this.db),
+            playlists: new Playlist.Repository(this.db),
         }
     }
 
