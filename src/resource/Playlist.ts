@@ -226,7 +226,8 @@ namespace Playlist {
         protected override delete(req: ApiRequest, id: string): ApiResponse {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!playlist.user.equals(req.auth!.user.id) && playlist.visibility === Playlist.Visibility.PRIVATE)) return Playlist.Controller.notFound;
+            if (!playlist.user.equals(req.auth!.user.id)) req.require(Token.Scope.PLAYLISTS_WRITE_ALL);
             this.library.repositories.playlists.delete(playlist.id);
             return new EmptyReponse();
         }
@@ -235,7 +236,8 @@ namespace Playlist {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!playlist.user.equals(req.auth!.user.id) && playlist.visibility === Playlist.Visibility.PRIVATE)) return Playlist.Controller.notFound;
+            if (!playlist.user.equals(req.auth!.user.id)) req.require(Token.Scope.PLAYLISTS_WRITE_ALL);
             const name = this.extract.name(req.body);
             const visibility = this.extract.visibility(req.body);
             const tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
@@ -250,7 +252,8 @@ namespace Playlist {
             req.require(Token.Scope.PLAYLISTS_WRITE);
             this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
-            if (playlist === null || (!req.auth!.has(Token.Scope.PLAYLISTS_WRITE_ALL) && !playlist.user.equals(req.auth!.user.id))) return Playlist.Controller.notFound;
+            if (playlist === null || (!playlist.user.equals(req.auth!.user.id) && playlist.visibility === Playlist.Visibility.PRIVATE)) return Playlist.Controller.notFound;
+            if (!playlist.user.equals(req.auth!.user.id)) req.require(Token.Scope.PLAYLISTS_WRITE_ALL);
             if ("name" in req.body) playlist.name = this.extract.name(req.body);
             if ("visibility" in req.body) playlist.visibility = this.extract.visibility(req.body);
             if ("tracks" in req.body) playlist.tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
