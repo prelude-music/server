@@ -208,6 +208,9 @@ namespace User {
             const scopes = this.extract.scopes(req.body);
             const disabled = this.extract.disabled(req.body);
 
+            if (!this.library.repositories.users.usernameAvailable(username))
+                return new ErrorResponse(409, `The username "${username}" is already taken.`);
+
             user.username = username;
             user.password = password;
             user.scopes = scopes;
@@ -222,7 +225,11 @@ namespace User {
             if (user === null) return User.Controller.notFound();
 
             this.validateBodyType(req.body);
-            if ("username" in req.body) user.username = this.extract.username(req.body);
+            if ("username" in req.body) {
+                user.username = this.extract.username(req.body);
+                if (!this.library.repositories.users.usernameAvailable(user.username))
+                    return new ErrorResponse(409, `The username "${user.username}" is already taken.`);
+            }
             if ("password" in req.body) user.password = await this.extract.password(req.body);
             if ("scopes" in req.body) user.scopes = this.extract.scopes(req.body);
             if ("disabled" in req.body) user.disabled = this.extract.disabled(req.body);
