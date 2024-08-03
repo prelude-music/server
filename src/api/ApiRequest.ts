@@ -36,47 +36,51 @@ export default class ApiRequest {
 
     public readonly url: URL;
 
+    private static getBody(req: http.IncomingMessage): Promise<Buffer> {
+        const chunks: Uint8Array[] = [];
+        req.on("data", chunk => chunks.push(chunk));
+        return new Promise((resolve, reject) => {
+            req.on("end", () => resolve(Buffer.concat(chunks)));
+            req.on("error", err => reject(err));
+        });
+    }
+
     public static async create(req: http.IncomingMessage, res: http.ServerResponse, library: Library): Promise<ApiRequest> {
         const request = new ApiRequest(req, res);
 
         request.#auth = await Authorisation.fromReq(request, library);
 
+        if (["CONNECT", "GET", "HEAD", "OPTIONS", "TRACE"].includes(request.method))
+            return request;
+
         const contentType = request.req.headers["content-type"];
         if (contentType === undefined)
             return request;
 
-        const contentLengthHeader = request.req.headers["content-length"];
-        if (contentLengthHeader === undefined)
-            return request;
-        const contentLength = Number.parseInt(contentLengthHeader, 10);
-        if (!Number.isFinite(contentLength) && contentLength <= 0)
-            return request;
-        const data = Buffer.alloc(Number.parseInt(contentLengthHeader, 10));
-        let offset = 0;
-        for await (const chunk of request.req) {
-            if (offset + chunk.length > data.length)
-                return request;
-            data.set(chunk, offset);
-            offset += chunk.length;
+        try {
+            const data = await this.getBody(req);
+
+            new EnhancedSwitch(contentType.toLowerCase().trim())
+                .case("application/json", () => {
+                    try {
+                        request.#body = JSON.parse(data.toString());
+                    } catch (e) {
+                        const err: SyntaxError = e as SyntaxError;
+                        request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
+                    }
+                })
+                .case("application/x-www-form-urlencoded", () => {
+                    request.#body = queryStringParse(data.toString());
+                })
+                .default(() => {
+                    request.#body = data;
+                });
         }
-
-        new EnhancedSwitch(contentType.toLowerCase().trim())
-            .case("application/json", () => {
-                try {
-                    request.#body = JSON.parse(data.toString());
-                }
-                catch (e) {
-                    const err: SyntaxError = e as SyntaxError;
-                    request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
-                }
-            })
-            .case("application/x-www-form-urlencoded", () => {
-                request.#body = queryStringParse(data.toString());
-            })
-            .default(() => {
-                request.#body = Buffer.from(data);
-            });
-
+        catch (error) {
+            if (error instanceof Error)
+                throw new ThrowableResponse(new ErrorResponse(400, error.message, {}, error));
+            throw new ThrowableResponse(new ErrorResponse(500, "Internal server error.", {}, error as any));
+        }
         return request;
     }
 
