@@ -812,7 +812,7 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/User"
       responses:
-        200:
+        201:
           description: The created user
           content:
             application/json:
