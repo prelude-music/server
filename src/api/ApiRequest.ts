@@ -36,15 +36,6 @@ export default class ApiRequest {
 
     public readonly url: URL;
 
-    private static getBody(req: http.IncomingMessage): Promise<Buffer> {
-        const chunks: Uint8Array[] = [];
-        req.on("data", chunk => chunks.push(chunk));
-        return new Promise((resolve, reject) => {
-            req.on("end", () => resolve(Buffer.concat(chunks)));
-            req.on("error", err => reject(err));
-        });
-    }
-
     public static async create(req: http.IncomingMessage, res: http.ServerResponse, library: Library): Promise<ApiRequest> {
         const request = new ApiRequest(req, res);
 
@@ -58,7 +49,9 @@ export default class ApiRequest {
             return request;
 
         try {
-            const data = await this.getBody(req);
+            const chunks: Uint8Array[] = []
+            for await (const chunk of req) chunks.push(chunk);
+            const data = Buffer.concat(chunks);
 
             new EnhancedSwitch(contentType.toLowerCase().trim())
                 .case("application/json", () => {
