@@ -165,10 +165,38 @@ namespace Token {
         USERS_WRITE = "users:write",
 
         /**
+         * Read-only access to {@link Playlist}s (excluding private playlists of other users)
+         *
+         * Recommended for: everyone
+         */
+        PLAYLISTS_READ = "playlists:read",
+
+        /**
+         * Write/modify access to your own {@link Playlist}s
+         *
+         * Recommended for: everyone
+         */
+        PLAYLISTS_WRITE = "playlists:write",
+
+        /**
+         * Read-only access to everyone's {@link Playlist}s
+         *
+         * Recommended for: admin
+         */
+        PLAYLISTS_READ_ALL = "playlists:read:all",
+
+        /**
+         * Write/modify access to everyone's {@link Playlist}s
+         *
+         * Recommended for: admin
+         */
+        PLAYLISTS_WRITE_ALL = "playlists:write:all",
+
+        /**
          * Grants full administrative access.
          * This scope acts as a wildcard, providing full access even if new API scopes are introduced in future updates.
          */
-        ADMIN = "admin"
+        ADMIN = "admin",
     }
 
     export class Repository extends Repository_<Token> {

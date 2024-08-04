@@ -51,6 +51,10 @@ tags: [
       same version."
   },
   {
+    name: Playlists,
+    description: Playlists are ordered collections of tracks that users can create.
+  },
+  {
     name: Users,
     description: "Users are accounts secured by a password that can be used to access the Prelude server."
   },
@@ -1273,6 +1277,282 @@ paths:
         403:
           $ref: "#/components/responses/Forbidden"
 
+  /playlists:
+    get:
+      tags: [Playlists]
+      summary: List Playlists
+      security:
+        - basic: [playlists:read]
+        - bearer: [playlists:read]
+      operationId: getPlaylists
+      parameters: [
+        {
+          in: query,
+          description: Number of resources to return per page,
+          name: limit,
+          schema: {
+            type: integer,
+            default: 100,
+            minimum: 1
+          }
+        },
+        {
+          in: query,
+          description: Page number to return,
+          name: page,
+          schema: {
+            type: integer,
+            default: 1,
+            minimum: 1
+          }
+        },
+        {
+          in: query,
+          description: Show public playlists (except those owned by the authenticated user). Incompatible with `all`.,
+          name: public,
+          schema: {
+            type: string,
+            examples: [""]
+          }
+        },
+        {
+          in: query,
+          description: "Show all playlists, including private and unlisted playlists, of all users. Requires scope
+            `playlists:read:all`. Incompatible with `public`.",
+          name: all,
+          required: false,
+          schema: {
+            type: string,
+            examples: [""]
+          }
+        }
+      ]
+      responses:
+        200:
+          description: A page of playlists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Playlist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Playlists]
+      summary: Create Playlist
+      security:
+        - basic: [playlists:write]
+        - bearer: [playlists:write]
+      operationId: createPlaylist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistWrite"
+              required: [name, visibility, tracks]
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PlaylistWrite"
+              required: [name, visibility, tracks]
+      responses:
+        201:
+          description: The created playlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          description: Some of the requested tracks could not be found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              tracks:
+                                type: string
+                                description: Information about which track could not be found
+        422:
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [Playlists]
+      summary: Delete All Playlists
+      security:
+        - basic: [playlists:write]
+        - bearer: [playlists:write]
+      operationId: deleteAllPlaylists
+      responses:
+        204:
+          description: All playlists deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+
+  /playlists/{id}:
+    get:
+      tags: [Playlists]
+      summary: Get Playlist
+      security:
+        - basic: [playlists:read]
+        - bearer: [playlists:read]
+      operationId: getPlaylist
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: {$ref: "#/components/schemas/Playlist/properties/id"}
+        }
+      ]
+      responses:
+        200:
+          description: The requested playlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+        404:
+          description: Playlist not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [Playlists]
+      summary: Delete Playlist
+      security:
+        - basic: [playlists:write]
+        - bearer: [playlists:write]
+      operationId: deletePlaylist
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: {$ref: "#/components/schemas/Playlist/properties/id"}
+        }
+      ]
+      responses:
+        204:
+          description: Playlist deleted successfully
+        404:
+          description: Playlist not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+    put:
+      tags: [Playlists]
+      summary: Replace Playlist
+      security:
+        - basic: [playlists:write]
+        - bearer: [playlists:write]
+      operationId: replacePlaylist
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: {$ref: "#/components/schemas/Playlist/properties/id"}
+        }
+      ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistWrite"
+              required: [name, visibility, tracks]
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PlaylistWrite"
+              required: [name, visibility, tracks]
+      responses:
+        200:
+          description: The updated playlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+        404:
+          description: Playlist not found, or some of the requested tracks could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
+    patch:
+      tags: [Playlists]
+      summary: Update Playlist
+      security:
+        - basic: [playlists:write]
+        - bearer: [playlists:write]
+      operationId: updatePlaylist
+      parameters: [
+        {
+          in: path,
+          name: id,
+          required: true,
+          schema: {$ref: "#/components/schemas/Playlist/properties/id"}
+        }
+      ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistWrite"
+      responses:
+        200:
+          description: The updated playlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+        404:
+          description: Playlist not found, or some of the requested tracks could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
+
 components:
   securitySchemes:
     basic:
@@ -1301,6 +1581,25 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    ValidationError:
+      description: Request body data validation. Specific errors for the fields that caused the error are in `fields`.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      fields:
+                        type: object
+                        description: Errors specific to each request body field.
+                        additionalProperties:
+                          type: string
+                          description: Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.
+                          examples: ["A user-friendly message regarding this field."]
   schemas:
     Artist:
       type: object
@@ -1425,6 +1724,35 @@ components:
               description: Whether the audio file is in a lossless/uncompressed format
               examples: [false]
 
+    Playlist:
+      type: object
+      properties:
+        id:
+          type: string
+          title: Playlist ID
+          examples: [d71c4bdc-e433-4413-a549-3a80be2962d3]
+        name:
+          type: string
+          description: A user-specified name for the playlist
+          maxLength: 128
+          examples: [My Playlist]
+        user:
+          $ref: "#/components/schemas/User/properties/id"
+        visibility:
+          type: string
+          description: |-
+            Specifies the visibility of the playlist.
+              - `private`: Only the creator and users with the `playlists:read:all` scope can see the playlist. It is not accessible or visible to others.
+              - `unlisted`: The playlist can be viewed by anyone who has the playlist ID. It will appear in lists only for the creator and users with the `playlists:read:all` scope.
+              - `public`: The playlist is accessible and visible to anyone with the `playlists:read` scope.
+          examples: [private]
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Track/properties/id"
+          description: A list of tracks in the playlist. The same track can appear multiple times in the list. Some tracks may no longer exist in the library.
+          examples: [[lJzqGqUGjPdAI+bEOrtHeLstgTU,FPcidn2LCPPQ1FYMAJH7-WN3wJE]]
+
     User:
       type: object
       properties:
@@ -1473,6 +1801,7 @@ components:
         note:
           type: string
           description: A user-specified note for the token (e.g. description of what this token is for).
+          maxLength: 128
 
     Scope:
       description: Controls access to API resources
@@ -1524,9 +1853,6 @@ components:
               examples: [A user-friendly error message.]
             fields:
               type: object
-              additionalProperties:
-                type: string
-                examples: [Field-specific errors mapped to request body fields. If this object is not empty, these error messages should be shown instead of the one in `message`.]
 
     BooleanLike:
       oneOf:
@@ -1551,6 +1877,16 @@ components:
           $ref: "#/components/schemas/User/properties/scopes"
         disabled:
           $ref: "#/components/schemas/BooleanLike"
+
+    PlaylistWrite:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/Playlist/properties/name"
+        visibility:
+          $ref: "#/components/schemas/Playlist/properties/visibility"
+        tracks:
+          $ref: "#/components/schemas/Playlist/properties/tracks"
 
   requestBodies:
     User:

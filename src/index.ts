@@ -11,6 +11,7 @@ import Track from "./resource/Track.js";
 import User from "./resource/User.js";
 import Token from "./resource/Token.js";
 import Password from "./Password.js";
+import Playlist from "./resource/Playlist.js";
 
 const configArgIndex = process.argv.findIndex(arg => arg === "--config" || arg === "-c");
 const customConfig = configArgIndex >= 0 && process.argv.length > configArgIndex + 1;
@@ -46,6 +47,7 @@ const server = await new Server(config, packageJson, [
     new Track.Controller(library),
     new User.Controller(library),
     new Token.Controller(library),
+    new Playlist.Controller(library),
 ], library).listen();
 console.log(`Server listening on http://0.0.0.0:${config.port}`);
 
