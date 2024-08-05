@@ -18,12 +18,16 @@ on:
       - '**/*.json'
       - '**/*.md'
       - 'opeanapi.yaml'
+      - '.idea/'
+      - '.gitignore'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - '**/*.json'
       - '**/*.md'
       - 'opeanapi.yaml'
+      - '.idea/'
+      - '.gitignore'
   schedule:
     - cron: "0 6 * * 1"
 
