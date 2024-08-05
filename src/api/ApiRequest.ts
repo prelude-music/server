@@ -1,4 +1,5 @@
 import http from "node:http";
+import {Component, Multipart} from "multipart-ts";
 import EnhancedSwitch from "enhanced-switch";
 import ErrorResponse from "../response/ErrorResponse.js";
 import ApiResponse from "../response/ApiResponse.js";
@@ -56,7 +57,7 @@ export default class ApiRequest {
         if (["CONNECT", "GET", "HEAD", "OPTIONS", "TRACE"].includes(request.method))
             return request;
 
-        const contentType = request.req.headers["content-type"];
+        const contentType = request.req.headers["content-type"]?.split(";")[0];
         if (contentType === undefined)
             return request;
 
@@ -80,6 +81,12 @@ export default class ApiRequest {
                     for (const [key, value] of usp.entries())
                         formData.append(key, value);
                     request.#body = formData;
+                })
+                .case("multipart/form-data", () => {
+                    const multipart = Multipart.part(new Component({
+                        "Content-Type": req.headers["content-type"]!
+                    }, data));
+                    request.#body = multipart.formData();
                 })
                 .default(() => {
                     request.#body = data;
