@@ -12,9 +12,9 @@
   "license": "GPL-3.0-only",
   "description": "",
   "devDependencies": {
-    "@redocly/cli": "^1.18.1",
+    "@redocly/cli": "^1.19.0",
     "@types/better-sqlite3": "^7.6.11",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.1.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
@@ -23,7 +23,7 @@
     "enhanced-switch": "^1.1.7",
     "json5": "^2.2.3",
     "mime": "^4.0.4",
-    "music-metadata": "^10.0.0",
+    "music-metadata": "^10.0.1",
     "yaml": "^2.5.0"
   }
 }
