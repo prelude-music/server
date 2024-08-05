@@ -1,6 +1,4 @@
 import http from "node:http";
-import {parse as queryStringParse} from "node:querystring";
-import JsonResponse from "../response/JsonResponse.js";
 import EnhancedSwitch from "enhanced-switch";
 import ErrorResponse from "../response/ErrorResponse.js";
 import ApiResponse from "../response/ApiResponse.js";
@@ -19,8 +17,8 @@ export default class ApiRequest {
         return this._handled;
     }
 
-    #body: JsonResponse.Object | JsonResponse.Array | Buffer = {};
-    public get body(): JsonResponse.Object | JsonResponse.Array | Buffer {
+    #body: FormData | Buffer = Buffer.alloc(0);
+    public get body(): FormData | Buffer {
         return this.#body;
     }
 
@@ -35,6 +33,20 @@ export default class ApiRequest {
     }
 
     public readonly url: URL;
+
+    private static jsonToFormData(json: Record<string, any>, formData: FormData = new FormData(), parentKey: string | null = null): FormData {
+        for (const [k, value] of Object.entries(json)) {
+            const key = parentKey === null ? k : `${parentKey}.${k}`;
+            if (Array.isArray(value))
+                for (const v of value)
+                    formData.append(key, `${v}`);
+            else if (value !== null && typeof value === "object")
+                this.jsonToFormData(value, formData, key)
+            else formData.append(key, `${value}`);
+        }
+        return formData;
+    }
+
 
     public static async create(req: http.IncomingMessage, res: http.ServerResponse, library: Library): Promise<ApiRequest> {
         const request = new ApiRequest(req, res);
@@ -56,14 +68,18 @@ export default class ApiRequest {
             new EnhancedSwitch(contentType.toLowerCase().trim())
                 .case("application/json", () => {
                     try {
-                        request.#body = JSON.parse(data.toString());
+                        request.#body = this.jsonToFormData(JSON.parse(data.toString()));
                     } catch (e) {
                         const err: SyntaxError = e as SyntaxError;
                         request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
                     }
                 })
                 .case("application/x-www-form-urlencoded", () => {
-                    request.#body = queryStringParse(data.toString());
+                    const usp = new URLSearchParams(data.toString());
+                    const formData = new FormData();
+                    for (const [key, value] of usp.entries())
+                        formData.append(key, value);
+                    request.#body = formData;
                 })
                 .default(() => {
                     request.#body = data;

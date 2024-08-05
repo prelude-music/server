@@ -146,30 +146,33 @@ namespace Playlist {
         private static readonly notFound = new ErrorResponse(404, "The requested playlist could not be found.");
 
         private readonly extract = {
-            name(body: any): string {
-                if (!("name" in body)) throw new ThrowableResponse(new FieldErrorResponse({name: "Please enter a name for this playlist."}));
-                if (typeof body.name !== "string") throw new ThrowableResponse(new FieldErrorResponse({name: "Must be a string."}));
-                if (body.name.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
-                return body.name;
+            name(body: FormData): string {
+                const name = body.get("name");
+                if (name === null) throw new ThrowableResponse(new FieldErrorResponse({name: "Please enter a name for this playlist."}));
+                if (typeof name !== "string") throw new ThrowableResponse(new FieldErrorResponse({name: "Must be a string."}));
+                if (name.length > 128) throw new ThrowableResponse(new FieldErrorResponse({name: "Must be 128 characters or less."}));
+                return name;
             },
-            user(auth: Authorisation, users: User.Repository, body: any): User.ID {
-                if (!auth.has(Token.Scope.PLAYLISTS_WRITE_ALL) || !("user" in body)) return auth.user.id;
-                if (typeof body.user !== "string") throw new ThrowableResponse(new FieldErrorResponse({user: "Must be a string."}));
-                const user = users.get(new User.ID(body.user));
+            user(auth: Authorisation, users: User.Repository, body: FormData): User.ID {
+                const userId = body.get("user");
+                if (!auth.has(Token.Scope.PLAYLISTS_WRITE_ALL) || userId === null) return auth.user.id;
+                if (typeof userId !== "string") throw new ThrowableResponse(new FieldErrorResponse({user: "Must be a string."}));
+                const user = users.get(new User.ID(userId));
                 if (user === null) throw new ThrowableResponse(new FieldErrorResponse({user: "A user with the provided ID does not exist."}, {}, 404));
                 return user.id;
             },
-            visibility(body: any): Playlist.Visibility {
-                if (!("visibility" in body)) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Please select playlist visibility."}));
-                if (typeof body.visibility !== "string") throw new ThrowableResponse(new FieldErrorResponse({visibility: "Must be a string."}));
-                if (!Object.values(Playlist.Visibility).includes(body.visibility as Playlist.Visibility)) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Invalid visibility setting."}));
-                return body.visibility as Playlist.Visibility;
+            visibility(body: FormData): Playlist.Visibility {
+                const visibility = body.get("visibility");
+                if (visibility === null) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Please select playlist visibility."}));
+                if (typeof visibility !== "string") throw new ThrowableResponse(new FieldErrorResponse({visibility: "Must be a string."}));
+                if (!Object.values(Playlist.Visibility).includes(visibility as Playlist.Visibility)) throw new ThrowableResponse(new FieldErrorResponse({visibility: "Invalid visibility setting."}));
+                return visibility as Playlist.Visibility;
             },
-            tracks(tracks: Track.Repository, body: any): Track.ID[] {
-                if (!("tracks" in body)) throw new ThrowableResponse(new FieldErrorResponse({tracks: "Please select the tracks for this playlist."}));
-                if (!Array.isArray(body.tracks)) throw new ThrowableResponse(new FieldErrorResponse({tracks: "Must be an array."}));
+            tracks(tracks: Track.Repository, body: FormData): Track.ID[] {
+                if (!body.has("tracks")) throw new ThrowableResponse(new FieldErrorResponse({tracks: "Please select the tracks for this playlist."}));
+                const tracksBody = body.getAll("tracks");
                 const ids: Track.ID[] = [];
-                for (const track of body.tracks) {
+                for (const track of tracksBody) {
                     if (typeof track !== "string") continue;
                     const id = new Track.ID(track);
                     if (tracks.get(id) === null) throw new ThrowableResponse(new FieldErrorResponse({tracks: `Track ${id} does not exist.`}, {}, 404));
@@ -195,11 +198,11 @@ namespace Playlist {
 
         public override create(req: ApiRequest): ApiResponse | Promise<ApiResponse> {
             req.require(Token.Scope.PLAYLISTS_WRITE);
-            this.validateBodyType(req.body);
-            const name = this.extract.name(req.body);
-            const user = this.extract.user(req.auth!, this.library.repositories.users, req.body);
-            const visibility = this.extract.visibility(req.body);
-            const tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
+            const body = this.validateBodyType(req.body);
+            const name = this.extract.name(body);
+            const user = this.extract.user(req.auth!, this.library.repositories.users, body);
+            const visibility = this.extract.visibility(body);
+            const tracks = this.extract.tracks(this.library.repositories.tracks, body);
 
             const playlist = new Playlist(Playlist.ID.random(), name, user, visibility, tracks);
             this.library.repositories.playlists.save(playlist);
@@ -234,13 +237,13 @@ namespace Playlist {
 
         protected override put(req: ApiRequest, id: string): ApiResponse {
             req.require(Token.Scope.PLAYLISTS_WRITE);
-            this.validateBodyType(req.body);
+            const body = this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
             if (playlist === null || (!playlist.user.equals(req.auth!.user.id) && playlist.visibility === Playlist.Visibility.PRIVATE)) return Playlist.Controller.notFound;
             if (!playlist.user.equals(req.auth!.user.id)) req.require(Token.Scope.PLAYLISTS_WRITE_ALL);
-            const name = this.extract.name(req.body);
-            const visibility = this.extract.visibility(req.body);
-            const tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
+            const name = this.extract.name(body);
+            const visibility = this.extract.visibility(body);
+            const tracks = this.extract.tracks(this.library.repositories.tracks, body);
             playlist.name = name;
             playlist.visibility = visibility;
             playlist.tracks = tracks;
@@ -250,22 +253,22 @@ namespace Playlist {
 
         protected override patch(req: ApiRequest, id: string): ApiResponse {
             req.require(Token.Scope.PLAYLISTS_WRITE);
-            this.validateBodyType(req.body);
+            const body = this.validateBodyType(req.body);
             const playlist = this.library.repositories.playlists.get(new Playlist.ID(id));
             if (playlist === null || (!playlist.user.equals(req.auth!.user.id) && playlist.visibility === Playlist.Visibility.PRIVATE)) return Playlist.Controller.notFound;
             if (!playlist.user.equals(req.auth!.user.id)) req.require(Token.Scope.PLAYLISTS_WRITE_ALL);
-            if ("name" in req.body) playlist.name = this.extract.name(req.body);
-            if ("visibility" in req.body) playlist.visibility = this.extract.visibility(req.body);
-            if ("tracks" in req.body) playlist.tracks = this.extract.tracks(this.library.repositories.tracks, req.body);
+            if ("name" in req.body) playlist.name = this.extract.name(body);
+            if ("visibility" in req.body) playlist.visibility = this.extract.visibility(body);
+            if ("tracks" in req.body) playlist.tracks = this.extract.tracks(this.library.repositories.tracks, body);
             this.library.repositories.playlists.save(playlist);
             return new JsonResponse(playlist.json());
         }
 
-        private validateBodyType(body: JsonResponse.Object | JsonResponse.Array | Buffer) {
+        private validateBodyType(body: FormData | Buffer) {
             if (Buffer.isBuffer(body)) throw new ThrowableResponse(new ErrorResponse(415, "The request body has unsupported media type.", {
                 Accept: "application/json, application/x-www-form-urlencoded"
             }));
-            if (Array.isArray(body)) throw new ThrowableResponse(new ErrorResponse(422, "The request body is an array; expected an object."));
+            return body;
         }
     }
 }
