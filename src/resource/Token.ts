@@ -267,35 +267,38 @@ namespace Token {
     export class Controller extends ResourceController {
         protected override readonly path = ["tokens"];
         private readonly extract = {
-            expires (body: any): Date | null {
-                if (!("expires" in body)) throw new ThrowableResponse(new FieldErrorResponse({expires: "Please select a date."}));
-                if (body.expires === null || body.expires === "null") return null;
-                const t = Number(body.expires);
+            expires (body: FormData): Date | null {
+                const expires = body.get("expires");
+                if (expires === null) throw new ThrowableResponse(new FieldErrorResponse({expires: "Please select a date."}));
+                const t = Number(expires);
                 if (!Number.isInteger(t)) throw new ThrowableResponse(new FieldErrorResponse({expires: "Must be a number representing UNIX time."}));
                 if (t <= Date.now() / 1000) throw new ThrowableResponse(new FieldErrorResponse({expires: "Must be in the future."}));
                 return new Date(t * 1000);
             },
-            scopes(body: any): Set<Scope> {
-                if (!("scopes" in body)) throw new ThrowableResponse(new FieldErrorResponse({scopes: "This field is required."}));
-                if (!Array.isArray(body.scopes)) throw new ThrowableResponse(new FieldErrorResponse({scopes: "Must be an array."}));
+            scopes(body: FormData): Set<Scope> {
+                if (!body.has("scopes")) throw new ThrowableResponse(new FieldErrorResponse({scopes: "This field is required."}));
+                const scopes = body.getAll("scopes");
+                if (scopes.length === 0) throw new ThrowableResponse(new FieldErrorResponse({scopes: "At least one scope is required."}));
                 const set = new Set<Scope>();
-                for (const scope of body.scopes) {
+                for (const scope of scopes) {
                     if (typeof scope !== "string") continue;
                     if (!Object.values(Token.Scope).includes(scope as Token.Scope)) throw new ThrowableResponse(new FieldErrorResponse({scopes: `Unknown scope ${scope}`}));
                     set.add(scope as Token.Scope);
                 }
                 return set;
             },
-            note(body: any): string {
-                if (!("note" in body)) throw new ThrowableResponse(new FieldErrorResponse({note: "Please enter a note."}));
-                if (typeof body.note !== "string") throw new ThrowableResponse(new FieldErrorResponse({note: "Must be a string."}));
-                if (body.note.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
-                return body.note;
+            note(body: FormData): string {
+                const note = body.get("note");
+                if (note === null) throw new ThrowableResponse(new FieldErrorResponse({note: "Please enter a note."}));
+                if (typeof note !== "string") throw new ThrowableResponse(new FieldErrorResponse({note: "Must be a string."}));
+                if (note.length > 128) throw new ThrowableResponse(new FieldErrorResponse({note: "Must be 128 characters or less."}));
+                return note;
             },
-            user(body: any): User.ID | null {
-                if (!("user" in body)) return null;
-                if (typeof body.user !== "string") throw new ThrowableResponse(new FieldErrorResponse({user: "Must be a string."}));
-                return new User.ID(body.user);
+            user(body: FormData): User.ID | null {
+                const user = body.get("user");
+                if (user === null) return null;
+                if (typeof user !== "string") throw new ThrowableResponse(new FieldErrorResponse({user: "Must be a string."}));
+                return new User.ID(user);
             },
             token(req: ApiRequest, repo: Token.Repository, id: string): Token {
                 if (req.auth === null)
@@ -340,20 +343,21 @@ namespace Token {
         protected override create(req: ApiRequest): ApiResponse {
             if (req.auth === null) return Authorisation.UNAUTHORISED;
 
+            const body = this.validateBodyType(req.body);
+
             const userId = req.auth.has(Token.Scope.TOKENS_WRITE_SELF)
                 ? req.auth.user.id
                 : (req.auth.has(Token.Scope.TOKENS_WRITE_ALL)
-                    ? this.extract.user(req.body) ?? req.auth.user.id
+                    ? this.extract.user(body) ?? req.auth.user.id
                     : null);
             if (userId === null) return Authorisation.FORBIDDEN;
 
             const user = this.library.repositories.users.get(userId);
             if (user === null) return new FieldErrorResponse({user: "A user with the provided ID does not exist."}, {}, 404);
 
-            this.validateBodyType(req.body);
-            const expires = this.extract.expires(req.body);
-            const scopes = this.extract.scopes(req.body);
-            const note = this.extract.note(req.body);
+            const expires = this.extract.expires(body);
+            const scopes = this.extract.scopes(body);
+            const note = this.extract.note(body);
             this.validateScopes(req.auth, scopes);
             const token = new Token(Token.ID.random(), user.id, Token.Secret.random(), expires, scopes, note);
             this.library.repositories.tokens.save(token);
@@ -380,26 +384,26 @@ namespace Token {
         }
 
         protected override put(req: ApiRequest, id: string): ApiResponse {
-            this.validateBodyType(req.body);
+            const body = this.validateBodyType(req.body);
             const token = this.extract.token(req, this.library.repositories.tokens, id);
-            token.note = this.extract.note(req.body);
+            token.note = this.extract.note(body);
             this.library.repositories.tokens.save(token);
             return new JsonResponse(token.json());
         }
 
         protected override patch(req: ApiRequest, id: string): ApiResponse {
-            this.validateBodyType(req.body);
+            const body = this.validateBodyType(req.body);
             const token = this.extract.token(req, this.library.repositories.tokens, id);
-            if ("note" in req.body) token.note = this.extract.note(req.body);
+            if ("note" in req.body) token.note = this.extract.note(body);
             this.library.repositories.tokens.save(token);
             return new JsonResponse(token.json());
         }
 
-        private validateBodyType(body: JsonResponse.Object | JsonResponse.Array | Buffer) {
+        private validateBodyType(body: FormData | Buffer): FormData {
             if (Buffer.isBuffer(body)) throw new ThrowableResponse(new ErrorResponse(415, "The request body has unsupported media type.", {
                 Accept: "application/json, application/x-www-form-urlencoded"
             }));
-            if (Array.isArray(body)) throw new ThrowableResponse(new ErrorResponse(422, "The request body is an array; expected an object."));
+            return body;
         }
     }
 }
