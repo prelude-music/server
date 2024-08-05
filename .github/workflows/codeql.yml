@@ -14,8 +14,16 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '**/*.json'
+      - '**/*.md'
+      - 'opeanapi.yaml'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '**/*.json'
+      - '**/*.md'
+      - 'opeanapi.yaml'
   schedule:
     - cron: "0 6 * * 1"
 
