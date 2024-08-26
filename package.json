@@ -20,7 +20,7 @@
   "dependencies": {
     "argon2": "^0.41.0",
     "better-sqlite3": "^11.1.2",
-    "enhanced-switch": "^1.1.7",
+    "enhanced-switch": "^1.1.8",
     "json5": "^2.2.3",
     "mime": "^4.0.4",
     "music-metadata": "^10.2.0",
