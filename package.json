@@ -14,7 +14,7 @@
   "devDependencies": {
     "@redocly/cli": "^1.23.1",
     "@types/better-sqlite3": "^7.6.11",
-    "@types/node": "^22.5.2",
+    "@types/node": "^22.5.4",
     "typescript": "^5.5.4"
   },
   "dependencies": {
