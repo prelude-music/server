@@ -65,8 +65,11 @@ namespace Artist {
             const iterations = Math.min(ids.size, 100);
             const iterator = ids.values();
             for (let i = 0; i < iterations; ++i) {
-                const artist = this.get(iterator.next().value)!;
-                if (artist !== null) artists.push(artist);
+                const id = iterator.next().value;
+                if (id === undefined) continue;
+                const artist = this.get(id)!;
+                if (artist === null) continue;
+                artists.push(artist);
             }
             return artists;
         }
