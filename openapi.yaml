@@ -241,16 +241,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Artist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested artist could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
 
   /artists/{id}/albums:
     get:
@@ -306,6 +306,12 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested artist could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /artists/{id}/tracks:
     get:
@@ -361,6 +367,12 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested artist could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /artists/{id}/image:
     get:
@@ -383,22 +395,22 @@ paths:
           description: The actual image binary of this artist, proxied from the artist's external image URL.
           content:
             image/*: {}
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
-          description: The artist does not have an associated image
+          description: The requested artist could not be found or the artist does not have an associated image
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        503:
+        502:
           description: Failed to proxy the artist's external image
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
 
   /albums:
     get:
@@ -472,16 +484,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Album"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested album could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
 
   /albums/{id}/tracks:
     get:
@@ -538,6 +550,12 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested album could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /albums/{id}/image:
     get:
@@ -561,16 +579,16 @@ paths:
           description: The actual image binary for this album
           content:
             image/*: {}
-        404:
-          description: The album does not have an associated image
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         401:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested album could not be found or the album does not have an associated image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /tracks:
     get:
@@ -663,16 +681,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Track"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested track could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
 
   /tracks/{id}/audio:
     get:
@@ -720,6 +738,12 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested track could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /tracks/{id}/image:
     get:
@@ -743,16 +767,16 @@ paths:
           description: The actual image binary for this track
           content:
             image/*: {}
-        404:
-          description: The track does not have an associated image
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         401:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested track could not be found or the track does not have an associated image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /users:
     get:
@@ -812,7 +836,7 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/User"
       responses:
-        200:
+        201:
           description: The created user
           content:
             application/json:
@@ -822,6 +846,25 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
     delete:
       tags: [Users]
       summary: Delete All Users
@@ -861,16 +904,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested user could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
     delete:
       tags: [Users]
       summary: Delete User
@@ -893,6 +936,12 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          description: The requested user could not be found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     put:
       tags: [Users]
       summary: Replace User
@@ -917,16 +966,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested user could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
     patch:
       tags: [Users]
       summary: Update User
@@ -957,16 +1025,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested user could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
+        409:
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              username:
+                                type: string
+        422:
+          $ref: "#/components/responses/ValidationError"
 
   /tokens:
     get:
@@ -1096,6 +1183,8 @@ paths:
           $ref: "#/components/responses/Unauthorised"
         403:
           $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
     delete:
       tags: [Tokens]
       summary: Delete All Tokens
@@ -1138,16 +1227,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Token"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested token could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
     delete:
       tags: [Tokens]
       summary: Delete Token
@@ -1168,16 +1257,16 @@ paths:
       responses:
         204:
           description: The requested token was deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested token could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
     put:
       tags: [Tokens]
       summary: Replace Token
@@ -1218,16 +1307,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Token"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested token could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
     patch:
       tags: [Tokens]
       summary: Update Token
@@ -1266,16 +1357,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Token"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: The requested token could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
+        422:
+          $ref: "#/components/responses/ValidationError"
 
   /playlists:
     get:
@@ -1431,16 +1524,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Playlist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: Playlist not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
     delete:
       tags: [Playlists]
       summary: Delete Playlist
@@ -1459,16 +1552,16 @@ paths:
       responses:
         204:
           description: Playlist deleted successfully
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: Playlist not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
     put:
       tags: [Playlists]
       summary: Replace Playlist
@@ -1501,16 +1594,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Playlist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: Playlist not found, or some of the requested tracks could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
         422:
           $ref: "#/components/responses/ValidationError"
     patch:
@@ -1540,16 +1633,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Playlist"
+        401:
+          $ref: "#/components/responses/Unauthorised"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           description: Playlist not found, or some of the requested tracks could not be found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        401:
-          $ref: "#/components/responses/Unauthorised"
-        403:
-          $ref: "#/components/responses/Forbidden"
         422:
           $ref: "#/components/responses/ValidationError"
 
