@@ -12,6 +12,7 @@ import ErrorResponse from "../response/ErrorResponse.js";
 import EmptyReponse from "../response/EmptyReponse.js";
 import ThrowableResponse from "../response/ThrowableResponse.js";
 import FieldErrorResponse from "../response/FieldErrorResponse.js";
+import Config from "../Config.js";
 
 class User extends ApiResource {
     public constructor(
@@ -102,46 +103,44 @@ namespace User {
     export class Controller extends ResourceController {
         protected override readonly path = ["users"];
         private readonly extract = {
-            username(body: any): string {
-                if (!("username" in body)) throw new ThrowableResponse(new FieldErrorResponse({username: "Please enter a username."}));
-                if (typeof body.username !== "string") throw new ThrowableResponse(new FieldErrorResponse({username: "Must be a string."}));
-                if (body.username.length < 3) throw new ThrowableResponse(new FieldErrorResponse({username: "Must be at least 3 characters long."}));
-                if (body.username.length > 24) throw new ThrowableResponse(new FieldErrorResponse({username: "Must not be longer than 24 characters."}));
-                if (!/^[a-zA-Z0-9-_.]+$/.test(body.username)) throw new ThrowableResponse(new FieldErrorResponse({username: "Must only contain alphanumeric characters, hyphens, underscores, and periods."}));
-                return body.username;
+            username(body: FormData): string {
+                const username = body.get("username");
+                if (username === null) throw new ThrowableResponse(new FieldErrorResponse({username: "Please enter a username."}));
+                if (typeof username !== "string") throw new ThrowableResponse(new FieldErrorResponse({username: "Must be a string."}));
+                if (username.length < 3) throw new ThrowableResponse(new FieldErrorResponse({username: "Must be at least 3 characters long."}));
+                if (username.length > 24) throw new ThrowableResponse(new FieldErrorResponse({username: "Must not be longer than 24 characters."}));
+                if (!/^[a-zA-Z0-9-_.]+$/.test(username)) throw new ThrowableResponse(new FieldErrorResponse({username: "Must only contain alphanumeric characters, hyphens, underscores, and periods."}));
+                return username;
             },
-            async password(body: any): Promise<Password> {
-                if (!("password" in body)) throw new ThrowableResponse(new FieldErrorResponse({password: "Please enter a password."}));
-                if (typeof body.password !== "string") throw new ThrowableResponse(new FieldErrorResponse({password: "Must be a string."}));
-                if (body.password.length < 3) throw new ThrowableResponse(new FieldErrorResponse({password: "Must be at least 3 characters long."}));
-                if (body.password.length > 24) throw new ThrowableResponse(new FieldErrorResponse({password: "Must not be longer than 24 characters."}));
-                return await Password.hash(body.password);
+            async password(body: FormData, config: Config): Promise<Password> {
+                const password = body.get("password");
+                if (password === null) throw new ThrowableResponse(new FieldErrorResponse({password: "Please enter a password."}));
+                if (typeof password !== "string") throw new ThrowableResponse(new FieldErrorResponse({password: "Must be a string."}));
+                if (password.length < config.minPasswordLength) throw new ThrowableResponse(new FieldErrorResponse({password: `Must be at least ${config.minPasswordLength} character${config.minPasswordLength !== 1 ? "s" : ""} long.`}));
+                return new Password(password);
             },
-            scopes(body: any): Set<Token.Scope> {
-                if (!("scopes" in body)) throw new ThrowableResponse(new FieldErrorResponse({scopes: "This field is required."}));
-                if (!Array.isArray(body.scopes)) throw new ThrowableResponse(new FieldErrorResponse({scopes: "Must be an array."}));
+            scopes(body: FormData): Set<Token.Scope> {
+                if (!body.has("scopes")) throw new ThrowableResponse(new FieldErrorResponse({scopes: "This field is required."}));
+                const scopes = body.getAll("scopes");
                 const set = new Set<Token.Scope>();
-                for (const scope of body.scopes) {
+                for (const scope of scopes) {
                     if (typeof scope !== "string") continue;
                     if (!Object.values(Token.Scope).includes(scope as Token.Scope)) throw new ThrowableResponse(new FieldErrorResponse({scopes: `Unknown scope ${scope}`}));
                     set.add(scope as Token.Scope);
                 }
                 return set;
             },
-            disabled(body: any): boolean {
-                if (!("disabled" in body)) return false;
+            disabled(body: FormData): boolean {
+                const disabled = body.get("disabled");
+                if (disabled === null) return false;
                 if (
-                    body.disabled === true
-                    || body.disabled === "true"
-                    || body.disabled === 1
-                    || body.disabled === "1"
-                    || body.disabled === "on"
+                    disabled === "true"
+                    || disabled === "1"
+                    || disabled === "on"
                 ) return true;
                 if (
-                    body.disabled === false
-                    || body.disabled === "false"
-                    || body.disabled === 0
-                    || body.disabled === "0"
+                    disabled === "false"
+                    || disabled === "0"
                 ) return false;
                 throw new ThrowableResponse(new FieldErrorResponse({disabled: "Must be a boolean."}));
             }
@@ -160,11 +159,11 @@ namespace User {
 
         protected override async create(req: ApiRequest): Promise<ApiResponse> {
             req.require(Token.Scope.USERS_WRITE);
-            this.validateBodyType(req.body);
-            const username = this.extract.username(req.body);
-            const password = await this.extract.password(req.body);
-            const scopes = this.extract.scopes(req.body);
-            const disabled = this.extract.disabled(req.body);
+            const body = this.validateBodyType(req.body);
+            const username = this.extract.username(body);
+            const password = await this.extract.password(body, this.library.config);
+            const scopes = this.extract.scopes(body);
+            const disabled = this.extract.disabled(body);
 
             if (!this.library.repositories.users.usernameAvailable(username))
                 return new ErrorResponse(409, `The username "${username}" is already taken.`);
@@ -202,11 +201,11 @@ namespace User {
             const user = this.library.repositories.users.get(new User.ID(id));
             if (user === null) return User.Controller.notFound();
 
-            this.validateBodyType(req.body);
-            const username = this.extract.username(req.body);
-            const password = await this.extract.password(req.body);
-            const scopes = this.extract.scopes(req.body);
-            const disabled = this.extract.disabled(req.body);
+            const body = this.validateBodyType(req.body);
+            const username = this.extract.username(body);
+            const password = await this.extract.password(body, this.library.config);
+            const scopes = this.extract.scopes(body);
+            const disabled = this.extract.disabled(body);
 
             if (!this.library.repositories.users.usernameAvailable(username))
                 return new ErrorResponse(409, `The username "${username}" is already taken.`);
@@ -224,24 +223,24 @@ namespace User {
             const user = this.library.repositories.users.get(new User.ID(id));
             if (user === null) return User.Controller.notFound();
 
-            this.validateBodyType(req.body);
-            if ("username" in req.body) {
-                user.username = this.extract.username(req.body);
+            const body = this.validateBodyType(req.body);
+            if (body.has("username")) {
+                user.username = this.extract.username(body);
                 if (!this.library.repositories.users.usernameAvailable(user.username))
                     return new ErrorResponse(409, `The username "${user.username}" is already taken.`);
             }
-            if ("password" in req.body) user.password = await this.extract.password(req.body);
-            if ("scopes" in req.body) user.scopes = this.extract.scopes(req.body);
-            if ("disabled" in req.body) user.disabled = this.extract.disabled(req.body);
+            if (body.has("password")) user.password = await this.extract.password(body, this.library.config);
+            if (body.has("scopes")) user.scopes = this.extract.scopes(body);
+            if (body.has("disabled")) user.disabled = this.extract.disabled(body);
             this.library.repositories.users.save(user);
             return new JsonResponse(user.json());
         }
 
-        private validateBodyType(body: JsonResponse.Object | JsonResponse.Array | Buffer) {
+        private validateBodyType(body: FormData | Buffer): FormData {
             if (Buffer.isBuffer(body)) throw new ThrowableResponse(new ErrorResponse(415, "The request body has unsupported media type.", {
-                Accept: "application/json, application/x-www-form-urlencoded"
+                Accept: "application/json, application/x-www-form-urlencoded, multipart/form-data"
             }));
-            if (Array.isArray(body)) throw new ThrowableResponse(new ErrorResponse(422, "The request body is an array; expected an object."));
+            return body;
         }
     }
 }

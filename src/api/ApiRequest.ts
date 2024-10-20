@@ -1,6 +1,5 @@
 import http from "node:http";
-import {parse as queryStringParse} from "node:querystring";
-import JsonResponse from "../response/JsonResponse.js";
+import {Component, Multipart} from "multipart-ts";
 import EnhancedSwitch from "enhanced-switch";
 import ErrorResponse from "../response/ErrorResponse.js";
 import ApiResponse from "../response/ApiResponse.js";
@@ -19,8 +18,8 @@ export default class ApiRequest {
         return this._handled;
     }
 
-    #body: JsonResponse.Object | JsonResponse.Array | Buffer = {};
-    public get body(): JsonResponse.Object | JsonResponse.Array | Buffer {
+    #body: FormData | Buffer = Buffer.alloc(0);
+    public get body(): FormData | Buffer {
         return this.#body;
     }
 
@@ -36,47 +35,68 @@ export default class ApiRequest {
 
     public readonly url: URL;
 
+    private static jsonToFormData(json: Record<string, any>, formData: FormData = new FormData(), parentKey: string | null = null): FormData {
+        for (const [k, value] of Object.entries(json)) {
+            const key = parentKey === null ? k : `${parentKey}.${k}`;
+            if (Array.isArray(value))
+                for (const v of value)
+                    formData.append(key, `${v}`);
+            else if (value !== null && typeof value === "object")
+                this.jsonToFormData(value, formData, key)
+            else formData.append(key, `${value}`);
+        }
+        return formData;
+    }
+
+
     public static async create(req: http.IncomingMessage, res: http.ServerResponse, library: Library): Promise<ApiRequest> {
         const request = new ApiRequest(req, res);
 
         request.#auth = await Authorisation.fromReq(request, library);
 
-        const contentType = request.req.headers["content-type"];
+        if (["CONNECT", "GET", "HEAD", "OPTIONS", "TRACE"].includes(request.method))
+            return request;
+
+        const contentType = request.req.headers["content-type"]?.split(";")[0];
         if (contentType === undefined)
             return request;
 
-        const contentLengthHeader = request.req.headers["content-length"];
-        if (contentLengthHeader === undefined)
-            return request;
-        const contentLength = Number.parseInt(contentLengthHeader, 10);
-        if (!Number.isFinite(contentLength) && contentLength <= 0)
-            return request;
-        const data = Buffer.alloc(Number.parseInt(contentLengthHeader, 10));
-        let offset = 0;
-        for await (const chunk of request.req) {
-            if (offset + chunk.length > data.length)
-                return request;
-            data.set(chunk, offset);
-            offset += chunk.length;
+        try {
+            const chunks: Uint8Array[] = []
+            for await (const chunk of req) chunks.push(chunk);
+            const data = Buffer.concat(chunks);
+
+            new EnhancedSwitch(contentType.toLowerCase().trim())
+                .case("application/json", () => {
+                    try {
+                        request.#body = this.jsonToFormData(JSON.parse(data.toString()));
+                    } catch (e) {
+                        const err: SyntaxError = e as SyntaxError;
+                        request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
+                    }
+                })
+                .case("application/x-www-form-urlencoded", () => {
+                    const usp = new URLSearchParams(data.toString());
+                    const formData = new FormData();
+                    for (const [key, value] of usp.entries())
+                        formData.append(key, value);
+                    request.#body = formData;
+                })
+                .case("multipart/form-data", () => {
+                    const multipart = Multipart.part(new Component({
+                        "Content-Type": req.headers["content-type"]!
+                    }, data));
+                    request.#body = multipart.formData();
+                })
+                .default(() => {
+                    request.#body = data;
+                });
         }
-
-        new EnhancedSwitch(contentType.toLowerCase().trim())
-            .case("application/json", () => {
-                try {
-                    request.#body = JSON.parse(data.toString());
-                }
-                catch (e) {
-                    const err: SyntaxError = e as SyntaxError;
-                    request.end(new ErrorResponse(400, "The request body is not valid JSON: " + err.message, {}, err));
-                }
-            })
-            .case("application/x-www-form-urlencoded", () => {
-                request.#body = queryStringParse(data.toString());
-            })
-            .default(() => {
-                request.#body = Buffer.from(data);
-            });
-
+        catch (error) {
+            if (error instanceof Error)
+                throw new ThrowableResponse(new ErrorResponse(400, error.message, {}, error));
+            throw new ThrowableResponse(new ErrorResponse(500, "Internal server error.", {}, error as any));
+        }
         return request;
     }
 
