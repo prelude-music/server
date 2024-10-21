@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "argon2": "^0.41.1",
-    "better-sqlite3": "^11.3.0",
+    "better-sqlite3": "^11.4.0",
     "enhanced-switch": "^1.1.9",
     "json5": "^2.2.3",
     "mime": "^4.0.4",
